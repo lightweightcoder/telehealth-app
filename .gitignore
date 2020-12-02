@@ -1,2 +1,5 @@
 # Dependency directories
-node_modules
+node_modules/
+
+# We want Git to save the existence of the directory, but not commit any of the actual files- just like the database, the contents of the folder itself are not part of the application code.
+uploads/*
