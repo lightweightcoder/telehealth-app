@@ -1,0 +1,35 @@
+{
+  "name": "telehealth-app",
+  "version": "1.0.0",
+  "description": "SWE1 Project 2: server side app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightweightcoder/telehealth-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lightweightcoder/telehealth-app/issues"
+  },
+  "homepage": "https://github.com/lightweightcoder/telehealth-app#readme",
+  "type": "module",
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "jssha": "^3.1.2",
+    "method-override": "^3.0.0",
+    "pg": "^8.5.1"
+  }
+}
