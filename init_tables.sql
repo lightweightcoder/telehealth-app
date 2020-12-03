@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS "clinics" (
   "id" SERIAL,
   "name" TEXT NOT NULL,
   "photo" TEXT NOT NULL,
+  "address" TEXT NOT NULL,
   PRIMARY KEY ("id")
 );
 
@@ -44,12 +45,13 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "is_doctor" BOOLEAN NOT NULL,
+  "doctor_registration_number" INT,
   "photo" TEXT,
   "allergies" TEXT NOT NULL,
-  "credit_card_number" INT UNIQUE NOT NULL,
+  "credit_card_number" INT NOT NULL,
   "credit_card_expiry" TEXT NOT NULL,
   "credit_card_ccv" INT NOT NULL,
-  "bank_number" INT UNIQUE,
+  "bank_number" INT,
   PRIMARY KEY ("id")
 );
 
