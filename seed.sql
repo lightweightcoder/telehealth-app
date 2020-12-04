@@ -8,6 +8,9 @@ INSERT INTO users (name, email, password, is_doctor, doctor_registration_number,
 INSERT INTO users (name, email, password, is_doctor, doctor_registration_number, photo, allergies, credit_card_number, credit_card_expiry, credit_card_ccv, bank_number) VALUES ('Person B', 'user2@gmail.com', 'user2', TRUE, 200, 'asdasd', 'nuts', 5678, '01/22', 200, 456);
 INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_number, credit_card_expiry, credit_card_ccv) VALUES ('Person C', 'user3@gmail.com', 'user3', FALSE, 'sun', 8765, '01/22', 200);
 
+INSERT INTO messages (sender_id, consultation_id, description) VALUES (1, 1, 'Hi what can I do for you today?');
+INSERT INTO messages (sender_id, consultation_id, description) VALUES (3, 1, 'My head is throbbing.');
+
 
 
 

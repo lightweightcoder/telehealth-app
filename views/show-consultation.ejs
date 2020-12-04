@@ -1,0 +1,111 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/login.css'}); %>
+
+<!-- consultation details -->
+<div class="container" id="form-container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Consultation Details</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>status</h6>
+      <p><%= consultation.status %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>doctor</h6>
+      <p>Dr <%= consultation.doctorName %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>patient</h6>
+      <p><%= consultation.patientName %></p>
+    </div>
+  </div>  
+
+  <div class="row">
+    <div class="col-12">
+      <h6>consultation date&time</h6>
+      <p><%= consultation.date %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>reason for consult</h6>
+      <p><%= consultation.description %></p>
+    </div>
+  </div>
+
+  <% if ('diagnosis' in consultation) { %> 
+  <div class="row">
+    <div class="col-12">
+      <h6>diagnosis</h6>
+      <p><%= consultation.diagnosis %></p>
+    </div>
+  </div>
+  <% }; %> 
+
+  <% if ('consultationPrice' in consultation) { %> 
+  <div class="row">
+    <div class="col-12">
+      <h6>consultations fees</h6>
+      <p>consultation service</p>
+      <p>$<%= consultation.consultationPrice %></p>
+      <p>total</p>
+      <p>$<%= consultation.totalPrice %></p>
+    </div>
+  </div>
+  <% }; %>
+</div>
+
+<!-- show cancel consult button (for patient) or accept/start consult (for doctor) -->
+<% if (formInputValue !== null) { %> 
+<div class="row">
+  <div class="col-12">
+    <form action="/consultation/<%= consultation.id %>?_method=PUT" method="POST">
+    <input type="hidden" name="update-status" value="<%= formInputValue %>">
+    <input class="btn btn-primary" type="submit" value="cancel consult" />
+    </form>
+  </div>
+</div>
+<% }; %>
+
+<!-- chat box -->
+<% if (messages !== null) { %>
+<div class="container" id="messages-container">
+  <h4>Chat</h4>
+  <% messages.forEach(function(message) { %>
+  <div class="row">
+    <div class="col-12">
+      <h6><%= message.name %></h6>
+      <p><%= message.description %></p>
+    </div>
+  </div>
+  <% }); %>
+</div>
+<% }; %> 
+
+<!-- send message form for patient -->
+<% if (consultation.status === 'ongoing') { %>
+<div class="container" id="create-message-container">
+  <div class="row">
+    <div class="col-12">
+      <form action="/consultation/<%= consultation.id %>?_method=PUT" method="POST">
+      <textarea name="message" rows="2" class="form-control"></textarea>
+      <input class="btn btn-primary" type="submit" value="send message" />
+      </form>
+    </div>
+  </div>
+</div>
+<% }; %> 
+
+<!-- footer -->
+<%- include('footer'); %>

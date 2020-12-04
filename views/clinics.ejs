@@ -1,0 +1,22 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
+
+<div class="container" id="clinics-list-container">
+  <div class="row">
+    <div class="col-12" id="clinics-list">
+      <ul id="clinics-list-items">
+        <% clinics.forEach(function(clinic) { %>
+        <li>
+          <p><%= clinic.name %></p>
+          <a href="/clinics/<%= clinic.id %>"
+            >select</a
+          >
+        </li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<%- include('footer'); %>

@@ -1,0 +1,36 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/login.css'}); %>
+
+<div class="container" id="form-container">
+  <div class="row">
+    <div class="col">
+      <h1>New Consultation</h1>
+    </div>
+  </div>
+
+  <form action="/consultation" method="POST">
+    <div class="form-group">
+      <label for="doctorName">doctor name</label><br />
+      <input type="text" id="doctorName" name="doctorName" value="Dr. <%= doctor.name %>" class="form-control" readonly/>
+    </div>
+    <div class="form-group">
+      <label for="patientName">patient name</label><br />
+      <input type="text" id="patientName" name="patientName" value="<%= patient.name %>" class="form-control" readonly/>
+    </div>
+    <div class="form-group">
+      <label for="dateTime">consultation date and time</label><br />
+      <input type="datetime-local" id="dateTime" name="dateTime" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label for="description">reason for consult</label><br />
+      <input type="text" id="description" name="description" class="form-control" />
+    </div>
+    <input type="hidden" name="doctorId" value="<%= doctor.id %>">
+    <input type="hidden" name="patientId" value="<%= patient.id %>">
+
+    <input type="submit" value="request consult" class="btn btn-outline-light" />
+  </form>
+</div>
+
+<!-- footer -->
+<%- include('footer'); %>

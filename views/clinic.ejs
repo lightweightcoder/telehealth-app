@@ -1,0 +1,31 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
+
+<div class="row">
+  <div class="col-12" id="clinic-name">
+    <h4><%= clinic.name %></h4>
+  </div>
+</div>
+
+<div class="container" id="doctors-list-container">
+  <div class="row">
+    <div class="col-12" id="doctors-list">
+      <ul id="clinics-list-items">
+        <% doctors.forEach(function(doctor) { %>
+          <!-- do not show that doctor if he is the one making the request -->
+          <% if (doctor.id !== user.id) { %> 
+            <li>
+              <p>Dr. <%= doctor.name %></p>
+              <a href="/new-consultation/<%= doctor.id %>"
+                >select doctor</a
+              >
+            </li>
+          <% }; %>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<%- include('footer'); %>

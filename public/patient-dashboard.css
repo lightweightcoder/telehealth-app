@@ -1,0 +1,10 @@
+body {
+  background-color: #f2dcbb;
+  padding-top: 60px;
+  padding-bottom: 40px;
+  color: black;
+  font-family: "Trebuchet MS", sans-serif;
+}
+
+@media (min-width: 992px) {
+}
