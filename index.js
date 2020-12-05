@@ -197,6 +197,7 @@ app.post('/', (request, response) => {
       response.cookie('userId', user.id);
 
       // redirect user to patient dashboard
+      console.log('hello');
       response.redirect('/patient-dashboard');
     } else {
       // password didn't match
@@ -519,7 +520,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     });
 
     // set next query for messages ------
-    const messagesQuery = `SELECT messages.description, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId}`;
+    const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.id ASC`;
 
     return pool.query(messagesQuery);
   };
@@ -529,6 +530,13 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     console.table(result.rows);
 
     if (result.rows.length > 0) {
+      // format the message date
+      result.rows.forEach((message) => {
+        const rawDate = message.created_at;
+        const formattedDate = moment(rawDate).format('MMM DD, YYYY - h:mma');
+        message.created_at = formattedDate;
+      });
+
       // store the patient's and doctor's messages
       templateData.messages = result.rows;
     }
@@ -551,7 +559,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
-// accept a request to update consultation status ----------
+// accept a request to update consultation status to upcoming, ongoing or cancelled ----------
 app.put('/consultation/:id', checkAuth, (request, response) => {
   console.log('request to update status of a consultation came in');
 
@@ -559,7 +567,7 @@ app.put('/consultation/:id', checkAuth, (request, response) => {
 
   const { updatedStatus } = request.body;
 
-  const updateConsultationQuery = `UPDATE consultations SET status='${updatedStatus}' WHERE id=${consultationId}`;
+  const updateConsultationQuery = `UPDATE consultations SET status='${updatedStatus}' WHERE id=${consultationId} RETURNING *`;
 
   // callback for updateConsultationQuery
   const whenUpdateConsultationQueryDone = (result) => {
@@ -586,6 +594,39 @@ app.put('/consultation/:id', checkAuth, (request, response) => {
   pool
     .query(updateConsultationQuery)
     .then(whenUpdateConsultationQueryDone)
+    .catch(whenQueryError);
+});
+
+// accept a request from patient to post a message
+app.post('/consultation/:id', checkAuth, (request, response) => {
+  console.log('request from patient to post a message came in');
+
+  const patientId = request.cookies.userId;
+  const consultationId = request.params.id;
+  const { message } = request.body;
+
+  const insertMessageQueryValues = [patientId, consultationId, `${message}`];
+
+  // query to insert message into database
+  const insertMessageQuery = 'INSERT INTO messages (sender_id, consultation_id, description) VALUES ($1, $2, $3) RETURNING *';
+
+  // callback for insertMessageQuery
+  const whenInsertMessageQueryDone = (result) => {
+    console.table(result.rows);
+
+    response.redirect(`/consultation/${consultationId}`);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
+  // execute the query
+  pool
+    .query(insertMessageQuery, insertMessageQueryValues)
+    .then(whenInsertMessageQueryDone)
     .catch(whenQueryError);
 });
 
