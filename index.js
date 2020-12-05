@@ -481,16 +481,21 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     const patientId = consultation.patient_id;
 
     // set the buttons to render in show-consultation.ejs depending if user is a doctor or patient
-    // and status of the consultation ---------------
+    // and status of the consultation
+    // formInputValue is the status of the consult that will be updated in the database
+    // buttonInputValue is the value to display in the button --------------------------------
     if (request.user.id === patientId) {
       if (consultation.status === 'requested' || consultation.status === 'upcoming') {
-        templateData.formInputValue = 'cancel-consult';
+        templateData.formInputValue = 'cancelled';
+        templateData.buttonInputValue = 'cancel consult';
       }
     } else if (request.user.id === doctorId) {
       if (consultation.status === 'requested') {
-        templateData.formInputValue = 'accept-consult';
+        templateData.formInputValue = 'upcoming';
+        templateData.buttonInputValue = 'accept consult';
       } else if (consultation.status === 'upcoming') {
-        templateData.formInputValue = 'start-consult';
+        templateData.formInputValue = 'ongoing';
+        templateData.buttonInputValue = 'start consult';
       }
     }
 
@@ -546,8 +551,43 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
-// in app.get('/consultation/:id') add logic to differentiate
-// between doctors and patient and update the ejs data accordingly.
+// accept a request to update consultation status ----------
+app.put('/consultation/:id', checkAuth, (request, response) => {
+  console.log('request to update status of a consultation came in');
+
+  const consultationId = request.params.id;
+
+  const { updatedStatus } = request.body;
+
+  const updateConsultationQuery = `UPDATE consultations SET status='${updatedStatus}' WHERE id=${consultationId}`;
+
+  // callback for updateConsultationQuery
+  const whenUpdateConsultationQueryDone = (result) => {
+    console.table(result.rows);
+
+    // redirect user to a route depending on the updated status of the consultation
+    if (updatedStatus === 'upcoming' || updatedStatus === 'cancelled') {
+      response.redirect(`/consultation/${consultationId}`);
+    } else if (updatedStatus === 'ongoing') {
+      response.redirect(`/consultation/${consultationId}/edit`);
+    } else {
+      console.log('error occurred when updating status');
+      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    }
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
+  // execute the query
+  pool
+    .query(updateConsultationQuery)
+    .then(whenUpdateConsultationQueryDone)
+    .catch(whenQueryError);
+});
 
 // set the port to listen for requests
 app.listen(PORT);

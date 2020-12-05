@@ -11,3 +11,4 @@ UPDATE consultations SET consultation_price_cents=1050 WHERE id=1;
 UPDATE consultations SET total_price_cents=2050 WHERE id=1;
 UPDATE consultations SET status='ongoing' WHERE id=1;
 UPDATE consultations SET status='requested' WHERE id=1;
+UPDATE consultations SET status='requested' WHERE id=2;

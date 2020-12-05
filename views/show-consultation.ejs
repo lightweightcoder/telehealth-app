@@ -71,8 +71,8 @@
 <div class="row">
   <div class="col-12">
     <form action="/consultation/<%= consultation.id %>?_method=PUT" method="POST">
-    <input type="hidden" name="update-status" value="<%= formInputValue %>">
-    <input class="btn btn-primary" type="submit" value="cancel consult" />
+      <input type="hidden" name="updatedStatus" value="<%= formInputValue %>">
+      <input class="btn btn-primary" type="submit" value="<%= buttonInputValue %>" />
     </form>
   </div>
 </div>
@@ -98,7 +98,7 @@
 <div class="container" id="create-message-container">
   <div class="row">
     <div class="col-12">
-      <form action="/consultation/<%= consultation.id %>?_method=PUT" method="POST">
+      <form action="/consultation/<%= consultation.id %>" method="POST">
       <textarea name="message" rows="2" class="form-control"></textarea>
       <input class="btn btn-primary" type="submit" value="send message" />
       </form>
