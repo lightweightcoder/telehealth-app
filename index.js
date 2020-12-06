@@ -84,6 +84,7 @@ const convertCentsToDollars = (cents) => {
  */
 const getHash = (input) => {
   // create new SHA object
+  // eslint-disable-next-line new-cap
   const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
 
   // create an unhashed cookie string based on user ID and myEnVar
@@ -185,6 +186,7 @@ app.post('/', (request, response) => {
     if (user.password === request.body.password) {
       // generate a loggedInHash for user id ------
       // create new SHA object
+      // eslint-disable-next-line new-cap
       const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
       // create an unhashed cookie string based on user ID and salt
       const unhashedCookieString = `${user.id}-${myEnvVar}`;
@@ -197,7 +199,6 @@ app.post('/', (request, response) => {
       response.cookie('userId', user.id);
 
       // redirect user to patient dashboard
-      console.log('hello');
       response.redirect('/patient-dashboard');
     } else {
       // password didn't match
@@ -410,32 +411,46 @@ app.get('/new-consultation/:doctorId', checkAuth, (request, response) => {
 app.post('/consultation', checkAuth, (request, response) => {
   console.log('post request to create a new consultation came in');
 
-  const insertConsultationQuery = 'INSERT INTO consultations (patient_id, doctor_id, date, status, description) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+  const { doctorId } = request.body;
 
-  // eslint-disable-next-line max-len
-  const values = [request.body.patientId, request.body.doctorId, request.body.dateTime, 'requested', request.body.description];
+  const consultationPriceQuery = `SELECT consultation_price_cents FROM users WHERE id=${doctorId}`;
+
+  // callback function for consultationPriceQuery
+  const whenConsultationPriceQueryDone = (result) => {
+    const consultationPriceCents = result.rows[0].consultation_price_cents;
+
+    // eslint-disable-next-line max-len
+    const insertConsultationQueryValues = [request.body.patientId, doctorId, request.body.dateTime, 'requested', request.body.description, consultationPriceCents, consultationPriceCents, 0];
+
+    const insertConsultationQuery = 'INSERT INTO consultations (patient_id, doctor_id, date, status, description, consultation_price_cents, total_price_cents, medicines_price_cents) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
+
+    return pool.query(insertConsultationQuery, insertConsultationQueryValues);
+  };
 
   // callback function for insertConsultationQuery
-  const whenInsertConsultationQueryDone = (error, result) => {
-    if (error) {
-      console.log('error executing query', error.stack);
-      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
-      return;
-    }
-
-    console.table(result.rows);
-
+  const whenInsertConsultationQueryDone = (result) => {
     const consultationId = result.rows[0].id;
 
+    // redirect to the route that renders a consultation
     response.redirect(`/consultation/${consultationId}`);
   };
 
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
   // execute the query
-  pool.query(insertConsultationQuery, values, whenInsertConsultationQueryDone);
+  pool
+    .query(consultationPriceQuery)
+    .then(whenConsultationPriceQueryDone)
+    .then(whenInsertConsultationQueryDone)
+    .catch(whenQueryError);
 });
 // end of functionality for patient to create a new consultation --------
 
-// render a consultation ---------------------------------------
+// render a consultation
 app.get('/consultation/:id', checkAuth, (request, response) => {
   console.log('request to render a consultation came in');
 
@@ -445,7 +460,6 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
 
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
-  // and in show-consultation.ejs to check if user is patient or doctor
   templateData.user = request.user;
 
   // set messages to null so ejs will not return error if there are no messages for the consultation
@@ -468,15 +482,14 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     const formattedDate = moment(rawDate).format('dddd, MMMM Do YYYY, h:mm a');
     templateData.consultation.date = formattedDate;
 
-    // format the consultation prices if those fields are not null
-    if (consultation.consultation_price_cents) {
-      const consultationPrice = convertCentsToDollars(consultation.consultation_price_cents);
-      const totalPrice = convertCentsToDollars(consultation.total_price_cents);
-      console.log(consultationPrice);
+    // format the consultation prices
+    const consultationPrice = convertCentsToDollars(consultation.consultation_price_cents);
+    const medicinesPrice = convertCentsToDollars(consultation.medicines_price_cents);
+    const totalPrice = convertCentsToDollars(consultation.total_price_cents);
 
-      templateData.consultation.consultationPrice = consultationPrice;
-      templateData.consultation.totalPrice = totalPrice;
-    }
+    templateData.consultation.consultationPrice = consultationPrice;
+    templateData.consultation.medicinesPrice = medicinesPrice;
+    templateData.consultation.totalPrice = totalPrice;
 
     const doctorId = consultation.doctor_id;
     const patientId = consultation.patient_id;
@@ -520,7 +533,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     });
 
     // set next query for messages ------
-    const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.id ASC`;
+    const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.created_at ASC`;
 
     return pool.query(messagesQuery);
   };
@@ -559,7 +572,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
-// accept a request to update consultation status to upcoming, ongoing or cancelled ----------
+// accept a request to update consultation status to upcoming, ongoing, cancelled or ended
 app.put('/consultation/:id', checkAuth, (request, response) => {
   console.log('request to update status of a consultation came in');
 
@@ -574,7 +587,7 @@ app.put('/consultation/:id', checkAuth, (request, response) => {
     console.table(result.rows);
 
     // redirect user to a route depending on the updated status of the consultation
-    if (updatedStatus === 'upcoming' || updatedStatus === 'cancelled') {
+    if (updatedStatus === 'upcoming' || updatedStatus === 'cancelled' || updatedStatus === 'ended') {
       response.redirect(`/consultation/${consultationId}`);
     } else if (updatedStatus === 'ongoing') {
       response.redirect(`/consultation/${consultationId}/edit`);
@@ -597,15 +610,15 @@ app.put('/consultation/:id', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
-// accept a request from patient to post a message
+// accept a request from user to post a message
 app.post('/consultation/:id', checkAuth, (request, response) => {
   console.log('request from patient to post a message came in');
 
-  const patientId = request.cookies.userId;
+  const senderId = Number(request.cookies.userId);
   const consultationId = request.params.id;
   const { message } = request.body;
 
-  const insertMessageQueryValues = [patientId, consultationId, `${message}`];
+  const insertMessageQueryValues = [senderId, consultationId, `${message}`];
 
   // query to insert message into database
   const insertMessageQuery = 'INSERT INTO messages (sender_id, consultation_id, description) VALUES ($1, $2, $3) RETURNING *';
@@ -614,7 +627,25 @@ app.post('/consultation/:id', checkAuth, (request, response) => {
   const whenInsertMessageQueryDone = (result) => {
     console.table(result.rows);
 
-    response.redirect(`/consultation/${consultationId}`);
+    // query to find all messages of this consultation that were sent by this sender
+    const selectSenderIdentityQuery = `SELECT consultations.patient_id, consultations.doctor_id FROM consultations INNER JOIN messages ON consultations.id=messages.consultation_id WHERE messages.sender_id=${senderId}`;
+
+    return pool.query(selectSenderIdentityQuery);
+  };
+
+  // callback for selectSenderIdentityQuery
+  const whenSelectSenderIdentityQueryDone = (result) => {
+    console.table(result.rows);
+
+    // find out if message sender is patient or doctor then redirect to correct route
+    if (senderId === result.rows[0].patient_id) {
+      response.redirect(`/consultation/${consultationId}`);
+    } else if (senderId === result.rows[0].doctor_id) {
+      response.redirect(`/consultation/${consultationId}/edit`);
+    } else {
+      console.log('error occurred when updating status');
+      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    }
   };
 
   // callback function for query error
@@ -627,8 +658,128 @@ app.post('/consultation/:id', checkAuth, (request, response) => {
   pool
     .query(insertMessageQuery, insertMessageQueryValues)
     .then(whenInsertMessageQueryDone)
+    .then(whenSelectSenderIdentityQueryDone)
     .catch(whenQueryError);
 });
+
+// render an editable consultation form for the doctor
+app.get('/consultation/:id/edit', checkAuth, (request, response) => {
+  console.log('request to render a editable consultation form came in');
+
+  const consultationId = request.params.id;
+
+  const templateData = {};
+
+  // store user info for ejs file
+  // currently used for navbarBrand links in header.ejs
+  templateData.user = request.user;
+
+  // set messages to null so ejs will not return error if there are no messages for the consultation
+  templateData.messages = null;
+
+  const consultationQuery = `SELECT * FROM consultations WHERE id=${consultationId}`;
+
+  // callback function for consultationQuery
+  const whenConsultationQueryDone = (result) => {
+    console.table(result.rows);
+
+    const consultation = result.rows[0];
+
+    templateData.consultation = consultation;
+
+    // format the date output ----------
+    const rawDate = result.rows[0].date;
+    const formattedDate = moment(rawDate).format('dddd, MMMM Do YYYY, h:mm a');
+    templateData.consultation.date = formattedDate;
+
+    // format the consultation prices
+    const consultationPrice = convertCentsToDollars(consultation.consultation_price_cents);
+    const medicinesPrice = convertCentsToDollars(consultation.medicines_price_cents);
+    const totalPrice = convertCentsToDollars(consultation.total_price_cents);
+
+    templateData.consultation.consultationPrice = consultationPrice;
+    templateData.consultation.medicinesPrice = medicinesPrice;
+    templateData.consultation.totalPrice = totalPrice;
+
+    const doctorId = consultation.doctor_id;
+    const patientId = consultation.patient_id;
+
+    // set next query for patient and doctor names ------
+    const patientAndDoctorNamesQuery = `SELECT id, name, is_doctor FROM users WHERE id IN (${doctorId}, ${patientId})`;
+
+    return pool.query(patientAndDoctorNamesQuery);
+  };
+
+  // callback for patientAndDoctorNamesQuery
+  const whenPatientAndDoctorNamesQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the patient's and doctor's names
+    result.rows.forEach((user) => {
+      if (user.id === Number(templateData.consultation.doctor_id)) {
+        templateData.consultation.doctorName = user.name;
+      } else {
+        templateData.consultation.patientName = user.name;
+      }
+    });
+
+    // set next query for messages ------
+    const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.created_at ASC`;
+
+    return pool.query(messagesQuery);
+  };
+
+  // callback for messagesQuery
+  const whenMessagesQueryDone = (result) => {
+    console.table(result.rows);
+
+    if (result.rows.length > 0) {
+      // format the message date
+      result.rows.forEach((message) => {
+        const rawDate = message.created_at;
+        const formattedDate = moment(rawDate).format('MMM DD, YYYY - h:mma');
+        message.created_at = formattedDate;
+      });
+
+      // store the patient's and doctor's messages
+      templateData.messages = result.rows;
+    }
+
+    // set the next query to find a list of medications
+    const medicationsQuery = 'SELECT * FROM medications';
+
+    // execute the query
+    return pool.query(medicationsQuery);
+  };
+
+  // callback for medicationsQuery
+  const whenMedicationsQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the patient's and doctor's messages
+    templateData.medications = result.rows;
+
+    response.render('edit-consultation', templateData);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
+  // execute the query
+  pool
+    .query(consultationQuery)
+    .then(whenConsultationQueryDone)
+    .then(whenPatientAndDoctorNamesQueryDone)
+    .then(whenMessagesQueryDone)
+    .then(whenMedicationsQueryDone)
+    .catch(whenQueryError);
+});
+
+// accept a request to add/edit a consultation diagnosis
+app.put('/consultation/:id/diagnosis', checkAuth, (request, response) => {});
 
 // set the port to listen for requests
 app.listen(PORT);

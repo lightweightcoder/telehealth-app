@@ -27,6 +27,12 @@ h1 {
   height: 200px;
 }
 
+#messages-container {
+  height: 300px;
+  white-space: normal;
+  overflow: auto;
+}
+
 @media (min-width: 992px) {
   #form-container {
     width: 900px;

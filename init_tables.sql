@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS "consultations" (
   "diagnosis" TEXT,
   "consultation_price_cents" INT,
   "total_price_cents" INT,
+  "medicines_price_cents" INT,
   PRIMARY KEY ("id")
 );
 
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "credit_card_expiry" TEXT NOT NULL,
   "credit_card_ccv" INT NOT NULL,
   "bank_number" INT,
+  "consultation_price_cents" INT,
   PRIMARY KEY ("id")
 );
 

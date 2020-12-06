@@ -1,0 +1,218 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/login.css'}); %>
+
+<!-- static consultation details -->
+<div class="container" id="form-container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Consultation Details</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>status</h6>
+      <p><%= consultation.status %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>doctor</h6>
+      <p>Dr <%= consultation.doctorName %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>patient</h6>
+      <p><%= consultation.patientName %></p>
+    </div>
+  </div>  
+
+  <div class="row">
+    <div class="col-12">
+      <h6>consultation date&time</h6>
+      <p><%= consultation.date %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h6>reason for consult</h6>
+      <p><%= consultation.description %></p>
+    </div>
+  </div>
+</div>
+
+<!-- dynamic consultation details  -->
+<!-- diagnosis -->
+<div class="container" id="diagnosis-container">
+  <div class="row">
+    <div class="col-12">
+      <h6>diagnosis</h6>
+      <form action="/consultation/<%= consultation.id %>/diagnosis?_method=PUT" method="POST">
+        <% if (consultation.diagnosis === null) { %>
+          <textarea name="diagnosis" rows="2" class="form-control" placeholder="enter diagnosis"></textarea>
+        <% } else { %> 
+          <textarea name="diagnosis" rows="2" class="form-control"><%= consultation.diagnosis %></textarea>
+        <% }; %>  
+
+        <input class="btn btn-primary" type="submit" value="update" />
+      </form>
+    </div>
+  </div>
+</div>
+  
+
+<!-- prescriptions -->
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h4>Prescriptions</h4>
+    </div>
+  </div>
+</div>
+
+<!-- created prescriptions -->
+<% if ('prescriptions' in consultation) { %> 
+  <% consultation.prescriptions.forEach(function(prescription) { %>
+    <div class="container prescription-containers">
+      <div class="row">
+        <div class="col-12">
+          <h6>prescription</h6>
+          <form action="/consultation/<%= consultation.id %>/prescription?_method=PUT" method="POST">
+            <!-- set the selected medicine to the one stored in the prescription -->
+            <select name="medicineName">
+              <% medications.forEach(function(medication) { %>
+                <% if(medication.id === prescription.medicine_id) { %> 
+                  <option value="<%= medication.id %>" selected><%= medication.name %></option>
+                <% } else { %>
+                  <option value="<%= medication.id %>"><%= medication.name %></option>
+                <% }; %> 
+              <% }); %> 
+            </select><br />
+            <label for="quantity">quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" value="<%= prescription.quantity %>"><br />
+            <label for="dosage">dosage:</label>
+            <input type="number" id="dosage" name="dosage_quantity" min="0" value="<%= prescription.dosage_quantity %>"><br />
+            <!-- set the selected dosage_unit to the one stored in the prescription -->
+            <% if (prescription.dosage_unit === "tablet(s)") { %>
+              <select name="dosage_unit">
+                <option value="tablet(s)" selected>tablet(s)</option>
+                <option value="ml">ml</option>
+              </select><br />
+            <% }; %> 
+            <% if (prescription.dosage_unit === "ml") { %>
+              <select name="dosage_unit">
+                <option value="tablet(s)">tablet(s)</option>
+                <option value="ml" selected>ml</option>
+              </select><br />
+            <% }; %> 
+            <label for="frequency">frequency:</label>
+            <input type="text" name="frequency" value="<%= prescription.frequency %>"><br />
+
+            <input class="btn btn-primary" type="submit" formaction="/consultation/<%= consultation.id %>/prescription?_method=DELETE" value="delete" />
+            <input class="btn btn-primary" type="submit" value="update" />
+          </form>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+<% }; %> 
+
+<!-- form to create a new prescription -->
+<div class="container prescription-containers">
+  <div class="row">
+    <div class="col-12">
+      <h4>new prescription</h4>
+      <form action="/consultation/<%= consultation.id %>/prescription" method="POST">
+        <select name="medicineName" required>
+          <% medications.forEach(function(medication) { %> 
+            <option value="<%= medication.id %>"><%= medication.name %></option>
+          <% }); %> 
+        </select><br /><br />
+        <label for="quantity">quantity:</label>
+        <input type="number" id="quantity" name="quantity" min="1" required><br /><br />
+        <label for="dosage">dosage:</label>
+        <input type="number" id="dosage" name="dosage_quantity" min="0" required><br /><br />
+        <select name="dosage_unit">
+          <option value="" disabled selected hidden>choose unit</option>
+          <option value="tablet(s)">tablet(s)</option>
+          <option value="ml">ml</option>
+        </select><br /><br />
+        <label for="frequency">frequency:</label>
+        <input type="text" name="frequency" required><br /><br />
+
+        <input class="btn btn-primary" type="submit" value="create" />
+      </form>
+    </div>
+  </div>
+</div>
+
+<br />
+
+<!-- consultation fees -->
+<div class="container consultation-fees-container">
+  <div class="row">
+    <div class="col-12">
+      <h6>consultations fees</h6>
+      <p>consultation service: $<%= consultation.consultationPrice %></p>
+      <p>medicine: $<%= consultation.medicinesPrice %></p>
+      <p>total: $<%= consultation.totalPrice %></p>
+    </div>
+  </div>
+</div>
+
+<!-- chat box -->
+<% if (messages !== null) { %>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h4>Chat</h4>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="messages-container">
+    <% messages.forEach(function(message) { %>
+    <div class="row">
+      <div class="col-12 text-wrap">
+        <h6><%= message.name %></h6>
+        <p><%= message.created_at %></p>
+        <p><%= message.description %></p>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+<% }; %> 
+
+<!-- send message form for doctor -->
+<div class="container" id="create-message-container">
+  <div class="row">
+    <div class="col-12">
+      <form action="/consultation/<%= consultation.id %>" method="POST">
+      <textarea name="message" rows="2" class="form-control"></textarea>
+      <input class="btn btn-primary" type="submit" value="send message" />
+      </form>
+    </div>
+  </div>
+</div>
+
+<br />
+
+<!-- end consult button -->
+<div class="container" id="end-consult-container">
+  <div class="row">
+    <div class="col-12">
+      <form action="/consultation/<%= consultation.id %>?_method=PUT" method="POST">
+        <input type="hidden" name="updatedStatus" value="ended">
+        <input class="btn btn-primary" type="submit" value="end consult" />
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- footer -->
+<%- include('footer'); %>
