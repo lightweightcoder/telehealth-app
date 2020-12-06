@@ -23,3 +23,7 @@ UPDATE users SET consultation_price_cents=1050 WHERE id=1;
 UPDATE consultations SET consultation_price_cents=1050 WHERE id=1;
 UPDATE consultations SET total_price_cents=1050 WHERE id=1;
 UPDATE consultations SET medicines_price_cents=0 WHERE id=5;
+
+UPDATE consultations SET status='ongoing' WHERE id=1;
+
+DELETE FROM prescriptions WHERE id=1;

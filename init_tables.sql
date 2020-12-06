@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "consultations" (
 CREATE TABLE IF NOT EXISTS "prescriptions" (
   "id" SERIAL,
   "consultation_id" INT NOT NULL,
-  "medicine_id " INT NOT NULL,
+  "medicine_id" INT NOT NULL,
   "quantity" INT NOT NULL,
   "dosage_quantity" INT NOT NULL,
   "dosage_unit" TEXT NOT NULL,

@@ -778,8 +778,110 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
-// accept a request to add/edit a consultation diagnosis
-app.put('/consultation/:id/diagnosis', checkAuth, (request, response) => {});
+// accept a request to add/update a consultation diagnosis
+app.put('/consultation/:id/diagnosis', checkAuth, (request, response) => {
+  console.log('request to add/update a consultation diagnosis came in');
 
+  const consultationId = request.params.id;
+  const { diagnosis } = request.body;
+
+  const updateDiagnosisQueryValues = [`${diagnosis}`, consultationId];
+
+  const updateDiagnosisQuery = 'UPDATE consultations SET diagnosis=$1 WHERE id=$2';
+
+  // callback function for updateDiagnosisQuery
+  const whenUpdateDiagnosisQueryDone = () => {
+    console.log('updated diagnosis!');
+
+    response.redirect(`/consultation/${consultationId}/edit`);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
+  // execute the query
+  pool
+    .query(updateDiagnosisQuery, updateDiagnosisQueryValues)
+    .then(whenUpdateDiagnosisQueryDone)
+    .catch(whenQueryError);
+});
+
+// accept a request to add a prescription
+app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
+  console.log('request to add a prescription came in');
+
+  const consultationId = request.params.id;
+
+  // get the prescription details
+  const {
+    medicine, quantity, frequency,
+  } = request.body;
+  const dosageQuantity = request.body.dosage_quantity;
+  const dosageUnit = request.body.dosage_unit;
+
+  // get the medicine id
+  // only works for medicineId 1 to 9 due to slice method
+  const medicineId = medicine.slice(0, 1);
+
+  const insertPrescriptionQuery = 'INSERT INTO prescriptions (consultation_id, medicine_id, quantity, dosage_quantity, dosage_unit, frequency) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+
+  const insertPrescriptionQueryValues = [consultationId, medicineId, quantity, dosageQuantity, `${dosageUnit}`, `${frequency}`];
+
+  // callback function for insertPrescriptionQuery
+  const whenInsertPrescriptionQueryDone = (result) => {
+    console.table(result.rows);
+
+    // to extract the consultation price
+    const selectConsultationPriceQuery = `SELECT consultation_price_cents, medicines_price_cents FROM consultations WHERE id=${consultationId}`;
+
+    // execute the query
+    return pool.query(selectConsultationPriceQuery);
+  };
+
+  // callback function for selectConsultationPriceQuery
+  const whenSelectConsultationPriceQueryDone = (result) => {
+    console.table(result.rows);
+
+    // get the medicine price and calculate total price of medicine and consultation ----
+    // only works for medicineId 1 to 9 due to slice method
+    const medicinePriceCents = Number(medicine.slice(2));
+    const medicinesPriceCents = medicinePriceCents * quantity;
+    const consultationPriceCents = result.rows[0].consultation_price_cents;
+    const accumulatedMedicinesPriceCents = result.rows[0].medicines_price_cents;
+    // eslint-disable-next-line max-len
+    const updatedAccumulatedMedicinesPriceCents = accumulatedMedicinesPriceCents + medicinesPriceCents;
+    const totalPriceCents = updatedAccumulatedMedicinesPriceCents + consultationPriceCents;
+
+    // set the next query to update the total_price_cents and medicines_price_cents of the consult
+    const updateConsultationQuery = 'UPDATE consultations SET total_price_cents=$1, medicines_price_cents=$2 WHERE id=1';
+
+    const updateConsultationQueryValues = [totalPriceCents, updatedAccumulatedMedicinesPriceCents];
+
+    // execute the query
+    return pool.query(updateConsultationQuery, updateConsultationQueryValues);
+  };
+
+  const whenUpdateConsultationQueryDone = () => {
+    console.log('updated consultation total_price_cents and medicines_price_cents!');
+
+    response.redirect(`/consultation/${consultationId}/edit`);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+  };
+
+  pool
+    .query(insertPrescriptionQuery, insertPrescriptionQueryValues)
+    .then(whenInsertPrescriptionQueryDone)
+    .then(whenSelectConsultationPriceQueryDone)
+    .then(whenUpdateConsultationQueryDone)
+    .catch(whenQueryError);
+});
 // set the port to listen for requests
 app.listen(PORT);
