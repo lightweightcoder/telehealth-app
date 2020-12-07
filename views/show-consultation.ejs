@@ -69,16 +69,11 @@
       <div class="row">
         <div class="col-12">
             <h6>medicine:</h6>
-            <p><%= prescription.medicineName %></p>          
+            <p><%= prescription.medicinename %></p>          
             <h6>quantity:</h6>
-            <p><%= prescription.quantity %></p>
-            <% if (prescription.dosage_unit === "NA") { %> 
-            <% } else { %>
-              <h6>dosage:</h6>
-              <p><%= prescription.dosage_quantity %> <%= prescription.dosage_unit %></p>
-            <% }; %>  
-            <h6>frequency:</h6>
-            <p><%= prescription.frequency %></p>
+            <p><%= prescription.quantity %></p>  
+            <h6>instructions:</h6>
+            <p><%= prescription.instruction %></p>
         </div>
       </div>
     </div>

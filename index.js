@@ -535,6 +535,19 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
       }
     });
 
+    // set next query for prescriptions and corresponding medicine names ------
+    const prescriptionsAndMedicineNamesQuery = `SELECT prescriptions.quantity, prescriptions.instruction, medications.name AS medicinename FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE consultation_id=${consultationId}`;
+
+    return pool.query(prescriptionsAndMedicineNamesQuery);
+  };
+
+  // callback for prescriptionsAndMedicineNamesQuery
+  const whenPrescriptionsAndMedicineNamesQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the prescriptions and medicine names
+    templateData.consultation.prescriptions = result.rows;
+
     // set next query for messages ------
     const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.created_at ASC`;
 
@@ -571,6 +584,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     .query(consultationQuery)
     .then(whenConsultationQueryDone)
     .then(whenPatientAndDoctorNamesQueryDone)
+    .then(whenPrescriptionsAndMedicineNamesQueryDone)
     .then(whenMessagesQueryDone)
     .catch(whenQueryError);
 });
