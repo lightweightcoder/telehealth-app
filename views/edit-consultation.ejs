@@ -11,6 +11,13 @@
 
   <div class="row">
     <div class="col-12">
+      <h6>clinic</h6>
+      <p><%= consultation.clinic.name %></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
       <h6>status</h6>
       <p><%= consultation.status %></p>
     </div>
@@ -83,7 +90,7 @@
           <h6>prescription</h6>
           <form action="/consultation/<%= consultation.id %>/prescription?_method=PUT" method="POST">
             <!-- prescription id is needed when deleting or updating it -->
-            <input type="hidden" name="prescriptionId" value="prescription.id">
+            <input type="hidden" name="prescriptionId" value="<%= prescription.id %>">
             <!-- set the selected medicine to the one stored in the prescription -->
             <select name="medicine">
               <% medications.forEach(function(medication) { %>

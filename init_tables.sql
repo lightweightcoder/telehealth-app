@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS "consultations" (
   "id" SERIAL,
   "patient_id" INT NOT NULL,
   "doctor_id" INT NOT NULL,
+  "clinic_id" INT NOT NULL,
   "date" TIMESTAMPTZ NOT NULL,
   "status" TEXT NOT NULL,
   "description" TEXT NOT NULL,

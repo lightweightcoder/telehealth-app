@@ -327,7 +327,7 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
 
   const doctorsQuery = `SELECT users.id, users.name, users.photo FROM users INNER JOIN clinic_doctors ON users.id=clinic_doctors.doctor_id WHERE clinic_doctors.clinic_id=${clinicId}`;
 
-  const clinicQuery = `SELECT name, photo FROM clinics WHERE id=${clinicId}`;
+  const clinicQuery = `SELECT * FROM clinics WHERE id=${clinicId}`;
 
   // callback function for doctorsQuery
   const whenDoctorsQueryDone = (result) => {
@@ -343,7 +343,7 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
   const whenClinicQueryDone = (result) => {
     console.table(result.rows);
 
-    // store the doctors' data
+    // store the clinic's data
     const clinic = result.rows[0];
     templateData.clinic = clinic;
 
@@ -367,7 +367,7 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
 
 // start of functionality for patient to create a new consultation --------
 // render a form to create a new consultation
-app.get('/new-consultation/:doctorId', checkAuth, (request, response) => {
+app.get('/new-consultation/:clinicName/:doctorId', checkAuth, (request, response) => {
   console.log('request to render a new consultation form came in');
 
   const templateData = {};
@@ -376,7 +376,10 @@ app.get('/new-consultation/:doctorId', checkAuth, (request, response) => {
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
 
-  const { doctorId } = request.params; // note: doctorId is a number in string data type
+  // store the clinic name to display in a consultation
+  templateData.clinicName = request.params.clinicName;
+
+  const { doctorId } = request.params; // doctorId is a number in string data type
   const patientId = request.user.id;
 
   const patientAndDoctorQuery = `SELECT id, name, is_doctor FROM users WHERE id IN (${doctorId}, ${patientId})`;
@@ -414,18 +417,36 @@ app.get('/new-consultation/:doctorId', checkAuth, (request, response) => {
 app.post('/consultation', checkAuth, (request, response) => {
   console.log('post request to create a new consultation came in');
 
+  // to store the clinic's id
+  let clinicId = '';
+
+  const { clinicName } = request.body;
+  console.log(clinicName);
   const { doctorId } = request.body;
 
-  const consultationPriceQuery = `SELECT consultation_price_cents FROM users WHERE id=${doctorId}`;
+  // set the query to find the clinic's id
+  const clinicIdQuery = `SELECT id FROM clinics WHERE name='${clinicName}'`;
+
+  // callback function for clinicIdQuery
+  const whenclinicIdQueryDone = (result) => {
+    console.table(result.rows);
+
+    clinicId = result.rows[0].id;
+
+    // set the query to find the doctor's consultation price
+    const consultationPriceQuery = `SELECT consultation_price_cents FROM users WHERE id=${doctorId}`;
+
+    return pool.query(consultationPriceQuery);
+  };
 
   // callback function for consultationPriceQuery
   const whenConsultationPriceQueryDone = (result) => {
     const consultationPriceCents = result.rows[0].consultation_price_cents;
 
     // eslint-disable-next-line max-len
-    const insertConsultationQueryValues = [request.body.patientId, doctorId, request.body.dateTime, 'requested', request.body.description, consultationPriceCents, consultationPriceCents, 0];
+    const insertConsultationQueryValues = [request.body.patientId, doctorId, clinicId, request.body.dateTime, 'requested', request.body.description, consultationPriceCents, consultationPriceCents, 0];
 
-    const insertConsultationQuery = 'INSERT INTO consultations (patient_id, doctor_id, date, status, description, consultation_price_cents, total_price_cents, medicines_price_cents) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
+    const insertConsultationQuery = 'INSERT INTO consultations (patient_id, doctor_id, clinic_id, date, status, description, consultation_price_cents, total_price_cents, medicines_price_cents) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
 
     return pool.query(insertConsultationQuery, insertConsultationQueryValues);
   };
@@ -446,7 +467,8 @@ app.post('/consultation', checkAuth, (request, response) => {
 
   // execute the query
   pool
-    .query(consultationPriceQuery)
+    .query(clinicIdQuery)
+    .then(whenclinicIdQueryDone)
     .then(whenConsultationPriceQueryDone)
     .then(whenInsertConsultationQueryDone)
     .catch(whenQueryError);
@@ -535,6 +557,23 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
       }
     });
 
+    // get the clinic id from whenConsultationQueryDone
+    const clinicId = templateData.consultation.clinic_id;
+
+    // set next query for clinic data
+    const clinicQuery = `SELECT * FROM clinics WHERE id=${clinicId}`;
+
+    return pool.query(clinicQuery);
+  };
+
+  // callback for clinicNameQuery
+  const whenclinicQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the clinic data
+    const clinic = result.rows[0];
+    templateData.consultation.clinic = clinic;
+
     // set next query for prescriptions and corresponding medicine names ------
     const prescriptionsAndMedicineNamesQuery = `SELECT prescriptions.quantity, prescriptions.instruction, medications.name AS medicinename FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE consultation_id=${consultationId}`;
 
@@ -545,8 +584,10 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
   const whenPrescriptionsAndMedicineNamesQueryDone = (result) => {
     console.table(result.rows);
 
-    // store the prescriptions and medicine names
-    templateData.consultation.prescriptions = result.rows;
+    if (result.rows.length > 0) {
+      // store the prescriptions and medicine names
+      templateData.consultation.prescriptions = result.rows;
+    }
 
     // set next query for messages ------
     const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.created_at ASC`;
@@ -584,6 +625,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     .query(consultationQuery)
     .then(whenConsultationQueryDone)
     .then(whenPatientAndDoctorNamesQueryDone)
+    .then(whenclinicQueryDone)
     .then(whenPrescriptionsAndMedicineNamesQueryDone)
     .then(whenMessagesQueryDone)
     .catch(whenQueryError);
@@ -740,6 +782,23 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
       }
     });
 
+    // get the clinic id from whenConsultationQueryDone
+    const clinicId = templateData.consultation.clinic_id;
+
+    // set next query for clinic data
+    const clinicQuery = `SELECT * FROM clinics WHERE id=${clinicId}`;
+
+    return pool.query(clinicQuery);
+  };
+
+  // callback for clinicNameQuery
+  const whenclinicQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the clinic data
+    const clinic = result.rows[0];
+    templateData.consultation.clinic = clinic;
+
     // set next query for messages ------
     const messagesQuery = `SELECT messages.id, messages.description, messages.created_at, users.name FROM messages INNER JOIN users ON messages.sender_id=users.id WHERE messages.consultation_id=${consultationId} ORDER BY messages.created_at ASC`;
 
@@ -760,6 +819,21 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
 
       // store the patient's and doctor's messages
       templateData.messages = result.rows;
+    }
+
+    // set the next query to find prescriptions of that consultation
+    const prescriptionsQuery = `SELECT * FROM prescriptions WHERE consultation_id=${consultationId}`;
+
+    // execute the query
+    return pool.query(prescriptionsQuery);
+  };
+
+  // callback for messagesQuery
+  const whenPrescriptionsQueryDone = (result) => {
+    console.table(result.rows);
+
+    if (result.rows.length > 0) {
+      templateData.consultation.prescriptions = result.rows;
     }
 
     // set the next query to find a list of medications
@@ -790,7 +864,9 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
     .query(consultationQuery)
     .then(whenConsultationQueryDone)
     .then(whenPatientAndDoctorNamesQueryDone)
+    .then(whenclinicQueryDone)
     .then(whenMessagesQueryDone)
+    .then(whenPrescriptionsQueryDone)
     .then(whenMedicationsQueryDone)
     .catch(whenQueryError);
 });

@@ -16,7 +16,7 @@
           <% if (doctor.id !== user.id) { %> 
             <li>
               <p>Dr. <%= doctor.name %></p>
-              <a href="/new-consultation/<%= doctor.id %>"
+              <a href="/new-consultation/<%= clinic.name %>/<%= doctor.id %>"
                 >select doctor</a
               >
             </li>
