@@ -13,6 +13,7 @@ INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_numb
 INSERT INTO medications (name, price_cents) VALUES ('ibuprofen', '500');
 INSERT INTO medications (name, price_cents) VALUES ('namenda solution', '1000');
 INSERT INTO medications (name, price_cents) VALUES ('guaifenasin solution', '1500');
+INSERT INTO medications (name, price_cents) VALUES ('steroid cream', '2000');
 
 
 

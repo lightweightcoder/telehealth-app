@@ -96,23 +96,8 @@
             </select><br />
             <label for="quantity">quantity:</label>
             <input type="number" id="quantity" name="quantity" min="1" value="<%= prescription.quantity %>"><br />
-            <label for="dosage">dosage:</label>
-            <input type="number" id="dosage" name="dosage_quantity" min="0" value="<%= prescription.dosage_quantity %>"><br />
-            <!-- set the selected dosage_unit to the one stored in the prescription -->
-            <% if (prescription.dosage_unit === "tablet(s)") { %>
-              <select name="dosage_unit">
-                <option value="tablet(s)" selected>tablet(s)</option>
-                <option value="ml">ml</option>
-              </select><br />
-            <% }; %> 
-            <% if (prescription.dosage_unit === "ml") { %>
-              <select name="dosage_unit">
-                <option value="tablet(s)">tablet(s)</option>
-                <option value="ml" selected>ml</option>
-              </select><br />
-            <% }; %> 
-            <label for="frequency">frequency:</label>
-            <input type="text" name="frequency" value="<%= prescription.frequency %>"><br />
+            <label for="instruction">instructions</label>
+            <input type="text" name="instruction" value="<%= prescription.instruction %>"><br />
 
             <input class="btn btn-primary" type="submit" formaction="/consultation/<%= consultation.id %>/prescription?_method=DELETE" value="delete" />
             <input class="btn btn-primary" type="submit" value="update" />
@@ -137,15 +122,8 @@
         </select><br /><br />
         <label for="quantity">quantity:</label>
         <input type="number" id="quantity" name="quantity" min="1" required><br /><br />
-        <label for="dosage">dosage:</label>
-        <input type="number" id="dosage" name="dosage_quantity" min="0" required><br /><br />
-        <select name="dosage_unit">
-          <option value="" disabled selected hidden>choose unit</option>
-          <option value="tablet(s)">tablet(s)</option>
-          <option value="ml">ml</option>
-        </select><br /><br />
-        <label for="frequency">frequency:</label>
-        <input type="text" name="frequency" required><br /><br />
+        <label for="instruction">instructions:</label>
+        <input type="text" name="instrution" required><br /><br />
 
         <input class="btn btn-primary" type="submit" value="create" />
       </form>

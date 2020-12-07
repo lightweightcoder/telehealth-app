@@ -12,6 +12,9 @@ import moment from 'moment';
 // environment variable is currently stored in ~/.profile (see RA module 3.6.4)
 const myEnvVar = process.env.MY_ENV_VAR;
 
+// error messages for queries
+const queryErrorMessage = 'error 503: service unavilable.<br /> Return to login page <a href="/">here</a>';
+
 // Initialise the DB connection ----------
 const { Pool } = pg;
 
@@ -124,7 +127,7 @@ const checkAuth = ((request, response, next) => {
       pool.query('SELECT * FROM users WHERE id=$1', values, (error, result) => {
         if (error || result.rows.length < 1) {
           console.log('Error executing query', error.stack);
-          response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+          response.status(503).send(queryErrorMessage);
           return;
         }
 
@@ -168,7 +171,7 @@ app.post('/', (request, response) => {
   pool.query('SELECT * from users WHERE email=$1', values, (error, result) => {
     if (error) {
       console.log('Error executing query', error.stack);
-      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+      response.status(503).send(queryErrorMessage);
       return;
     }
 
@@ -235,7 +238,7 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the queries
@@ -270,7 +273,7 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the queries
@@ -296,7 +299,7 @@ app.get('/clinics', checkAuth, (request, response) => {
   const whenClinicsQueryDone = (selectError, selectResult) => {
     if (selectError) {
       console.log('Error executing query', selectError.stack);
-      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+      response.status(503).send(queryErrorMessage);
       return;
     }
 
@@ -351,7 +354,7 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the sql query to show a list of clinics
@@ -397,7 +400,7 @@ app.get('/new-consultation/:doctorId', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the sql query to show a list of clinics
@@ -438,7 +441,7 @@ app.post('/consultation', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -560,7 +563,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -593,14 +596,14 @@ app.put('/consultation/:id', checkAuth, (request, response) => {
       response.redirect(`/consultation/${consultationId}/edit`);
     } else {
       console.log('error occurred when updating status');
-      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+      response.status(503).send(queryErrorMessage);
     }
   };
 
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -644,14 +647,14 @@ app.post('/consultation/:id', checkAuth, (request, response) => {
       response.redirect(`/consultation/${consultationId}/edit`);
     } else {
       console.log('error occurred when updating status');
-      response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+      response.status(503).send(queryErrorMessage);
     }
   };
 
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -765,7 +768,7 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -799,7 +802,7 @@ app.put('/consultation/:id/diagnosis', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   // execute the query
@@ -817,18 +820,16 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
 
   // get the prescription details
   const {
-    medicine, quantity, frequency,
+    medicine, quantity, instruction,
   } = request.body;
-  const dosageQuantity = request.body.dosage_quantity;
-  const dosageUnit = request.body.dosage_unit;
 
   // get the medicine id
   // only works for medicineId 1 to 9 due to slice method
   const medicineId = medicine.slice(0, 1);
 
-  const insertPrescriptionQuery = 'INSERT INTO prescriptions (consultation_id, medicine_id, quantity, dosage_quantity, dosage_unit, frequency) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+  const insertPrescriptionQuery = 'INSERT INTO prescriptions (consultation_id, medicine_id, quantity, instruction) VALUES ($1, $2, $3, $4) RETURNING *';
 
-  const insertPrescriptionQueryValues = [consultationId, medicineId, quantity, dosageQuantity, `${dosageUnit}`, `${frequency}`];
+  const insertPrescriptionQueryValues = [consultationId, medicineId, quantity, `${instruction}`];
 
   // callback function for insertPrescriptionQuery
   const whenInsertPrescriptionQueryDone = (result) => {
@@ -873,7 +874,7 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
-    response.status(503).send('error 503: service unavilable.<br /> Return to login page <a href="/">here</a>');
+    response.status(503).send(queryErrorMessage);
   };
 
   pool
