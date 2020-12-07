@@ -575,7 +575,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     templateData.consultation.clinic = clinic;
 
     // set next query for prescriptions and corresponding medicine names ------
-    const prescriptionsAndMedicineNamesQuery = `SELECT prescriptions.quantity, prescriptions.instruction, medications.name AS medicinename FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE consultation_id=${consultationId}`;
+    const prescriptionsAndMedicineNamesQuery = `SELECT prescriptions.quantity, prescriptions.instruction, medications.name AS medicinename FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE consultation_id=${consultationId} ORDER BY prescriptions.id ASC`;
 
     return pool.query(prescriptionsAndMedicineNamesQuery);
   };
@@ -822,7 +822,7 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
     }
 
     // set the next query to find prescriptions of that consultation
-    const prescriptionsQuery = `SELECT * FROM prescriptions WHERE consultation_id=${consultationId}`;
+    const prescriptionsQuery = `SELECT * FROM prescriptions WHERE consultation_id=${consultationId} ORDER BY id ASC`;
 
     // execute the query
     return pool.query(prescriptionsQuery);
@@ -974,5 +974,113 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
     .then(whenUpdateConsultationQueryDone)
     .catch(whenQueryError);
 });
+
+// accept a request to update a prescription
+app.put('/consultation/:id/prescription', checkAuth, (request, response) => {
+  console.log('request to update a prescription came in');
+
+  const consultationId = request.params.id;
+  const { prescriptionId } = request.body;
+
+  // get the updated medicine details from the form
+  const { medicine } = request.body;
+  const newMedicineQty = request.body.quantity;
+  // get the new medicine price and calculate total price of medicine ----
+  // only works for medicineId 1 to 9 due to slice method
+  const newMedicinePriceCents = Number(medicine.slice(2));
+  const newMedicinesPriceCents = newMedicinePriceCents * newMedicineQty;
+
+  // for finding total medicine price of the old prescription
+  let oldMedicineQty = '';
+  let oldMedicinePriceCents = '';
+  let oldMedicinesPriceCents = '';
+
+  // query for finding the total medicine price of the old prescription
+  const selectOldPrescriptionMedicineQuery = `SELECT prescriptions.quantity, medications.price_cents FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE prescriptions.id=${prescriptionId}`;
+
+  // callback function for selectOldPrescriptionMedicineQuery
+  const whenSelectOldPrescriptionMedicineQueryDone = (result) => {
+    console.table(result.rows);
+
+    // find the total medicine price of the old prescription
+    oldMedicineQty = result.rows[0].quantity;
+    oldMedicinePriceCents = result.rows[0].price_cents;
+    oldMedicinesPriceCents = oldMedicineQty * oldMedicinePriceCents;
+    console.log(oldMedicinesPriceCents);
+
+    // get the medicine id
+    // only works for medicineId 1 to 9 due to slice method
+    const medicineId = medicine.slice(0, 1);
+
+    // get the new instruction
+    const newInstruction = request.body.instruction;
+
+    // query to update the prescription in the database
+    const updatePrescriptionQuery = `UPDATE prescriptions SET medicine_id=$1, quantity=$2, instruction=$3 WHERE id=${prescriptionId} RETURNING *`;
+
+    const updatePrescriptionQueryValues = [medicineId, newMedicineQty, `${newInstruction}`];
+
+    // execute query to update the prescription
+    return pool.query(updatePrescriptionQuery, updatePrescriptionQueryValues);
+  };
+
+  // callback function for updatePrescriptionQuery
+  const whenUpdatePrescriptionQueryValuesDone = (result) => {
+    console.table(result.rows);
+
+    // query to find consultation price and old total medicines price
+    const oldPricesQuery = `SELECT consultation_price_cents, medicines_price_cents FROM consultations WHERE id=${consultationId}`;
+
+    // execute query
+    return pool.query(oldPricesQuery);
+  };
+
+  // callback function for updatePrescriptionQuery
+  const whenOldPricesQueryDone = (result) => {
+    console.table(result.rows);
+
+    const consultationPriceCents = result.rows[0].consultation_price_cents;
+    const oldAccumulatedMedicinesPriceCents = result.rows[0].medicines_price_cents;
+
+    // find new total price of medicines
+    // eslint-disable-next-line max-len
+    const newAccumulatedMedicinesPriceCents = oldAccumulatedMedicinesPriceCents - oldMedicinesPriceCents + newMedicinesPriceCents;
+
+    // find new total price of consultation
+    const newTotalPriceCents = newAccumulatedMedicinesPriceCents + consultationPriceCents;
+
+    // query to update the consultation prices
+    const updateConsultationQuery = 'UPDATE consultations SET total_price_cents=$1, medicines_price_cents=$2 WHERE id=$3';
+
+    // eslint-disable-next-line max-len
+    const updateConsultationQueryValues = [newTotalPriceCents, newAccumulatedMedicinesPriceCents, consultationId];
+
+    // execute query to update the consultation prices
+    return pool.query(updateConsultationQuery, updateConsultationQueryValues);
+  };
+
+  // callback function for updateConsultationQuery
+  const whenUpdateConsultationQueryDone = () => {
+    console.log('updated consultation!');
+
+    // redirect to render the updated consultation form
+    response.redirect(`/consultation/${consultationId}/edit`);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  pool
+    .query(selectOldPrescriptionMedicineQuery)
+    .then(whenSelectOldPrescriptionMedicineQueryDone)
+    .then(whenUpdatePrescriptionQueryValuesDone)
+    .then(whenOldPricesQueryDone)
+    .then(whenUpdateConsultationQueryDone)
+    .catch(whenQueryError);
+});
+
 // set the port to listen for requests
 app.listen(PORT);
