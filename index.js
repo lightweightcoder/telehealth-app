@@ -1006,7 +1006,6 @@ app.put('/consultation/:id/prescription', checkAuth, (request, response) => {
     oldMedicineQty = result.rows[0].quantity;
     oldMedicinePriceCents = result.rows[0].price_cents;
     oldMedicinesPriceCents = oldMedicineQty * oldMedicinePriceCents;
-    console.log(oldMedicinesPriceCents);
 
     // get the medicine id
     // only works for medicineId 1 to 9 due to slice method
@@ -1079,6 +1078,97 @@ app.put('/consultation/:id/prescription', checkAuth, (request, response) => {
     .then(whenUpdatePrescriptionQueryValuesDone)
     .then(whenOldPricesQueryDone)
     .then(whenUpdateConsultationQueryDone)
+    .catch(whenQueryError);
+});
+
+// accept a request to delete a prescription
+app.delete('/consultation/:id/prescription', checkAuth, (request, response) => {
+  console.log('request to delete a prescription came in');
+
+  const consultationId = request.params.id;
+  const { prescriptionId } = request.body;
+
+  // for finding total medicine price of the prescription to be deleted
+  let medicineQty = '';
+  let medicinePriceCents = '';
+  let medicinesPriceCents = '';
+
+  // query for finding the total medicine price of the prescription to be deleted
+  const selectPrescriptionAndMedicineQuery = `SELECT prescriptions.quantity, medications.price_cents FROM prescriptions INNER JOIN medications ON prescriptions.medicine_id=medications.id WHERE prescriptions.id=${prescriptionId}`;
+
+  // callback function for selectPrescriptionAndMedicineQuery
+  const whenSelectPrescriptionAndMedicineQueryDone = (result) => {
+    console.table(result.rows);
+
+    // find the total medicine price of the prescription to be deleted
+    medicineQty = result.rows[0].quantity;
+    medicinePriceCents = result.rows[0].price_cents;
+    medicinesPriceCents = medicineQty * medicinePriceCents;
+
+    // query to find consultation price and old total medicines price
+    const oldPricesQuery = `SELECT consultation_price_cents, medicines_price_cents FROM consultations WHERE id=${consultationId}`;
+
+    // execute query
+    return pool.query(oldPricesQuery);
+  };
+
+  // callback function for oldPricesQuery
+  const whenOldPricesQueryDone = (result) => {
+    console.table(result.rows);
+
+    const consultationPriceCents = result.rows[0].consultation_price_cents;
+    const oldAccumulatedMedicinesPriceCents = result.rows[0].medicines_price_cents;
+
+    // find new total price of medicines
+    // eslint-disable-next-line max-len
+    const newAccumulatedMedicinesPriceCents = oldAccumulatedMedicinesPriceCents - medicinesPriceCents;
+
+    // find new total price of consultation
+    const newTotalPriceCents = newAccumulatedMedicinesPriceCents + consultationPriceCents;
+
+    // query to update the consultation prices
+    const updateConsultationQuery = 'UPDATE consultations SET total_price_cents=$1, medicines_price_cents=$2 WHERE id=$3';
+
+    // eslint-disable-next-line max-len
+    const updateConsultationQueryValues = [newTotalPriceCents, newAccumulatedMedicinesPriceCents, consultationId];
+
+    // execute query to update the consultation prices
+    return pool.query(updateConsultationQuery, updateConsultationQueryValues);
+  };
+
+  // callback function for updateConsultationQuery
+  const whenUpdateConsultationQueryDone = (result) => {
+    console.table(result.rows);
+    console.log('updated consultation!');
+
+    // query to delete the prescription from database
+    const deletePrescriptionQuery = `DELETE FROM prescriptions WHERE id=${prescriptionId} RETURNING *`;
+
+    // execute query
+    return pool.query(deletePrescriptionQuery);
+  };
+
+  // callback function for deletePrescriptionQuery
+  const whenDeletePrescriptionQueryDone = (result) => {
+    console.table(result.rows);
+    console.log('deleted prescription!');
+
+    // redirect to render the updated consultation form
+    response.redirect(`/consultation/${consultationId}/edit`);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  pool
+    .query(selectPrescriptionAndMedicineQuery)
+    .then(whenSelectPrescriptionAndMedicineQueryDone)
+    .then(whenOldPricesQueryDone)
+    .then(whenUpdateConsultationQueryDone)
+    .then(whenDeletePrescriptionQueryDone)
     .catch(whenQueryError);
 });
 
