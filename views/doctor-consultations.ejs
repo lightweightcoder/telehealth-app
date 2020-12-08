@@ -1,0 +1,16 @@
+<!-- header -->
+<%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h2><%= consultationStatus %> consultations</h2>
+      <% consultations.forEach((consultation) => { %>
+        <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> patient: <%= consultation.patient_name %></a></p>
+      <% }); %> 
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<%- include('footer'); %>

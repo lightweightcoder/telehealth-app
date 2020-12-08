@@ -14,12 +14,13 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h2><a href="/consultations/ongoing">ongoing consultations</a></h2>
+      <h2>ongoing consultations</h2>
       <% consultations.forEach((consultation) => { %>
         <% if (consultation.status === 'ongoing') { %>
           <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
         <% } %> 
       <% }); %> 
+      <a href="/patient-consultations/ongoing">see all ongoing consults</a>
     </div>
   </div>
 </div>
@@ -27,12 +28,13 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h2><a href="/consultations/requested">requested consultations</a></h2>
+      <h2>requested consultations</h2>
       <% consultations.forEach((consultation) => { %>
         <% if (consultation.status === 'requested') { %>
           <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
         <% } %> 
       <% }); %> 
+      <a href="/patient-consultations/requested">see all requested consults</a>
     </div>
   </div>
 </div>
@@ -40,12 +42,13 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h2><a href="/consultations/upcoming">upcoming consultations</a></h2>
+      <h2>upcoming consultations</h2>
       <% consultations.forEach((consultation) => { %>
         <% if (consultation.status === 'upcoming') { %>
           <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
         <% } %> 
       <% }); %> 
+      <a href="/patient-consultations/upcoming">see all upcoming consults</a>
     </div>
   </div>
 </div>
@@ -53,12 +56,13 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h2><a href="/consultations/ended">past consultations</a></h2>
+      <h2>past consultations</h2>
       <% consultations.forEach((consultation) => { %>
         <% if (consultation.status === 'ended') { %>
           <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
         <% } %> 
       <% }); %> 
+      <a href="/patient-consultations/ended">see all past consults</a>
     </div>
   </div>
 </div>

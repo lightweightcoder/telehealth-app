@@ -1172,5 +1172,93 @@ app.delete('/consultation/:id/prescription', checkAuth, (request, response) => {
     .catch(whenQueryError);
 });
 
+// render a list of consultations of a certain status for a patient
+app.get('/patient-consultations/:status', checkAuth, (request, response) => {
+  console.log('request to render patient consultations came in');
+
+  const templateData = {};
+
+  // store user info for ejs file
+  // currently used for navbarBrand links in header.ejs
+  templateData.user = request.user;
+
+  const consultationStatus = request.params.status;
+
+  // store the consultation status for ejs file
+  if (consultationStatus === 'ended') {
+    templateData.consultationStatus = 'past';
+  } else {
+    templateData.consultationStatus = consultationStatus;
+  }
+
+  const consultationsQuery = `SELECT consultations.id, consultations.date, users.name AS doctor_name, users.photo AS doctor_photo FROM consultations INNER JOIN users ON consultations.doctor_id=users.id WHERE consultations.patient_id=${request.user.id} AND consultations.status='${consultationStatus}'`;
+
+  // callback function for consultationsQuery for the patient
+  const whenConsultationsQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the consultations data
+    templateData.consultations = result.rows;
+
+    response.render('patient-consultations', templateData);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  // execute the queries
+  pool
+    .query(consultationsQuery)
+    .then(whenConsultationsQueryDone)
+    .catch(whenQueryError);
+});
+
+// render a list of consultations of a certain status for a doctor
+app.get('/doctor-consultations/:status', checkAuth, (request, response) => {
+  console.log('request to render doctor consultations came in');
+
+  const templateData = {};
+
+  // store user info for ejs file
+  // currently used for navbarBrand links in header.ejs
+  templateData.user = request.user;
+
+  const consultationStatus = request.params.status;
+
+  // store the consultation status for ejs file
+  if (consultationStatus === 'ended') {
+    templateData.consultationStatus = 'past';
+  } else {
+    templateData.consultationStatus = consultationStatus;
+  }
+
+  const consultationsQuery = `SELECT consultations.id, consultations.date, users.name AS patient_name, users.photo AS patient_photo FROM consultations INNER JOIN users ON consultations.patient_id=users.id WHERE consultations.doctor_id=${request.user.id} AND consultations.status='${consultationStatus}'`;
+
+  // callback function for consultationsQuery for the patient
+  const whenConsultationsQueryDone = (result) => {
+    console.table(result.rows);
+
+    // store the consultations data
+    templateData.consultations = result.rows;
+
+    response.render('doctor-consultations', templateData);
+  };
+
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  // execute the queries
+  pool
+    .query(consultationsQuery)
+    .then(whenConsultationsQueryDone)
+    .catch(whenQueryError);
+});
+
 // set the port to listen for requests
 app.listen(PORT);
