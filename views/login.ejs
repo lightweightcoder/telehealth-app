@@ -20,6 +20,14 @@
     <link rel="stylesheet" href="/login.css" />
 
     <title>Dr on the go</title>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <img src="/healthcare.svg" id="top-logo"/>
+        </div>
+      </div>
+    </div>
   </head>
   <body>
     <div class="container justify-content-center">
@@ -29,10 +37,15 @@
           
           <h4>Login</h4>
 
+          <!-- invalid message if there is -->
+          <% if(typeof invalidMessage != 'undefined') { %>
+            <p id="invalid-message"><%= invalidMessage %></p>
+          <% } %>
+
           <form action="/" method="POST">
             <div class="form-group">
               <label for="email">Email</label><br />
-              <input type="text" id="email" name="email" class="form-control <%= validation.email %>" placeholder="Email" required/>
+              <input type="email" id="email" name="email" class="form-control" placeholder="Email" required/>
             </div>
             <div class="form-group">
               <label for="password">Password</label><br />

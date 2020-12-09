@@ -170,9 +170,8 @@ app.get('/', (request, response) => {
 app.post('/', (request, response) => {
   console.log('post request to login came in');
 
-  // set validation object to store validation classes for each input field
+  // set object to store messages for invalid email or password input fields
   const templateData = {};
-  templateData.validation = {};
 
   const values = [request.body.email];
 
@@ -183,43 +182,51 @@ app.post('/', (request, response) => {
       return;
     }
 
-    if (result.rows.length === 0) {
-      // we didnt find a user with that email.
-      templateData.validation.email = 'is-invalid';
-
-      // render login page
-      response.render('login', templateData);
-      // redirect to login page
-      // response.redirect('/');
-      console.log('did not find user with that email');
-      return;
-    }
-
     const user = result.rows[0];
+    console.log('type of user:', typeof (user));
+    console.log(result.rows);
 
-    // verify input password with password in database
-    if (user.password === request.body.password) {
-      // generate a loggedInHash for user id ------
-      // create new SHA object
-      // eslint-disable-next-line new-cap
-      const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
-      // create an unhashed cookie string based on user ID and salt
-      const unhashedCookieString = `${user.id}-${myEnvVar}`;
-      // generate a hashed cookie string using SHA object
-      shaObj.update(unhashedCookieString);
-      const hashedCookieString = shaObj.getHash('HEX');
+    // verify input email and password with those in database
+    if (result.rows.length !== 0) {
+      if (user.password === request.body.password) {
+        console.log('email and password matched!');
 
-      // set the loggedInHash and userId cookies in the response
-      response.cookie('loggedInHash', hashedCookieString);
-      response.cookie('userId', user.id);
+        // generate a loggedInHash for user id ------
+        // create new SHA object
+        // eslint-disable-next-line new-cap
+        const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
+        // create an unhashed cookie string based on user ID and salt
+        const unhashedCookieString = `${user.id}-${myEnvVar}`;
+        // generate a hashed cookie string using SHA object
+        shaObj.update(unhashedCookieString);
+        const hashedCookieString = shaObj.getHash('HEX');
 
-      // redirect user to patient dashboard
-      response.redirect('/patient-dashboard');
-    } else {
+        // set the loggedInHash and userId cookies in the response
+        response.cookie('loggedInHash', hashedCookieString);
+        response.cookie('userId', user.id);
+
+        // redirect user to patient dashboard
+        response.redirect('/patient-dashboard');
+      } else {
       // password didn't match
+        console.log('password did not match');
+
+        // add message to inform user of invalid email/password
+        templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
+
+        // redirect to login page
+        response.render('login', templateData);
+      }
+    }
+    else {
+      // email didn't match
+      console.log('email did not match');
+
+      // add message to inform user of invalid email/password
+      templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
+
       // redirect to login page
-      response.redirect('/');
-      console.log('password did not match with database');
+      response.render('login', templateData);
     }
   });
 });
