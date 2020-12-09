@@ -45,13 +45,13 @@ CREATE TABLE IF NOT EXISTS "users" (
   "email" TEXT UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
   "is_doctor" BOOLEAN NOT NULL,
-  "doctor_registration_number" INT,
+  "doctor_registration_number" TEXT,
   "photo" TEXT,
   "allergies" TEXT NOT NULL,
-  "credit_card_number" INT NOT NULL,
+  "credit_card_number" TEXT NOT NULL,
   "credit_card_expiry" TEXT NOT NULL,
-  "credit_card_ccv" INT NOT NULL,
-  "bank_number" INT,
+  "credit_card_cvv" INT NOT NULL,
+  "bank_number" TEXT,
   "consultation_price_cents" INT,
   PRIMARY KEY ("id")
 );

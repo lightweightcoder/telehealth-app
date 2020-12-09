@@ -46,13 +46,13 @@ const pool = new Pool(pgConnectionConfigs);
 
 // multer settings ------------------------
 // set the name of the upload directory here for multer
-const multerUpload = multer({ dest: 'uploads/' });
+const multerUpload = multer({ dest: 'uploads/profile-photos' });
 
 // Initialise Express ---------------------
 // create an express application
 const app = express();
 // set the port number
-const PORT = 3000;
+const PORT = 3004;
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 // config to accept request form data
@@ -155,16 +155,24 @@ const checkAuth = ((request, response, next) => {
 // routes ==============================
 
 // start of functionality for user to login --------
-// render the login form that will create the request
+// render the login form
 app.get('/', (request, response) => {
   console.log('request to render a login form came in');
 
-  response.render('login');
+  // set validation object to prevent ejs from getting errors
+  const templateData = {};
+  templateData.validation = {};
+
+  response.render('login', templateData);
 });
 
 // accept the login form request
 app.post('/', (request, response) => {
   console.log('post request to login came in');
+
+  // set validation object to store validation classes for each input field
+  const templateData = {};
+  templateData.validation = {};
 
   const values = [request.body.email];
 
@@ -177,8 +185,12 @@ app.post('/', (request, response) => {
 
     if (result.rows.length === 0) {
       // we didnt find a user with that email.
+      templateData.validation.email = 'is-invalid';
+
+      // render login page
+      response.render('login', templateData);
       // redirect to login page
-      response.redirect('/');
+      // response.redirect('/');
       console.log('did not find user with that email');
       return;
     }
@@ -212,6 +224,257 @@ app.post('/', (request, response) => {
   });
 });
 // end of functionality for user to login --------
+
+// start of functionality for user to signup --------
+// render the signup form
+app.get('/signup', (request, response) => {
+  console.log('request to render signup form came in');
+
+  const { identity } = request.query;
+
+  if (identity === 'patient') {
+    // render a patient sign up form
+    response.render('patient-signup');
+  } else if (identity === 'doctor') {
+    // query to get list of clinics
+    const clinicsQuery = 'SELECT * FROM clinics';
+
+    // execute query
+    pool.query(clinicsQuery, (error, result) => {
+      if (error) {
+        console.log('Error executing query', error.stack);
+        response.status(503).send(queryErrorMessage);
+      }
+
+      // store clinics' data
+      const clinics = result.rows;
+
+      const templateData = {};
+      templateData.clinics = clinics;
+
+      // render a doctor sign up form
+      response.render('doctor-signup', templateData);
+    });
+  }
+});
+
+// accept request to signup
+app.post('/signup', (request, response) => {
+  console.log('request to signup came in!');
+
+  // check if user is a doctor or patient by checking if there is a 'bankNumber' input field
+  let isDoctor = false;
+  if ('bankNumber' in request.body) {
+    isDoctor = true;
+  }
+
+  // array to store messages for invalid form inputs
+  const invalidMessages = [];
+
+  // object that stores data to be inserted into ejs file
+  const templateData = {};
+  templateData.invalidMessages = invalidMessages;
+
+  // details of person signing up
+  const {
+    name, email, password, allergies, creditCardNumber, creditCardExpiry, cvv,
+  } = request.body;
+
+  // variables to store additionl details for doctors
+  let clinicIds = '';
+  let bankNumber = '';
+  let consultationPrice = '';
+  let doctorRegistrationNumber = '';
+
+  // queries -----------------------------------------------
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  // for checking if email of person signing up is taken ----
+  // query to check if email of person signing up is taken
+  const isExistingUserQuery = 'SELECT * FROM users WHERE email=$1';
+
+  // values for isExistingUserQuery
+  const isExistingUserQueryValues = [`${email}`];
+
+  // callback function for isExistingUserQuery
+  const whenIsExistingUserQueryDone = (result) => {
+    console.table(result.rows);
+
+    if (isDoctor === false) {
+      // check if the email already belongs to an existing user
+      if (result.rows.length > 0) {
+        // patient signup email already belongs to an existing user
+
+        // add message to inform user that email has been taken
+        invalidMessages.push('The email you entered already exists.');
+
+        // render the patient signup form again with invalid form input messages
+        response.render('patient-signup', templateData);
+      } else {
+        // patient signup email does not belong to an existing user
+        // so insert the new user details into database
+        // and redirect to route that renders patient dashboard (app.get('/patient-dashboard')
+
+        // query to insert new patient details
+        const insertPatientQuery = 'INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_number, credit_card_expiry, credit_card_cvv) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
+
+        const insertPatientQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`];
+
+        // callback for insertPatientQuery
+        const whenInsertPatientQueryDone = (insertResult) => {
+          console.log('insert patient query done');
+          console.table(insertResult.rows);
+
+          const user = insertResult.rows[0];
+
+          // generate a loggedInHash for user id ------
+          // create new SHA object
+          // eslint-disable-next-line new-cap
+          const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
+          // create an unhashed cookie string based on user ID and salt
+          const unhashedCookieString = `${user.id}-${myEnvVar}`;
+          // generate a hashed cookie string using SHA object
+          shaObj.update(unhashedCookieString);
+          const hashedCookieString = shaObj.getHash('HEX');
+
+          // set the loggedInHash and userId cookies in the response
+          response.cookie('loggedInHash', hashedCookieString);
+          response.cookie('userId', user.id);
+
+          // redirect to route that renders patient dashboard
+          response.redirect('/patient-dashboard');
+        };
+
+        pool
+          .query(insertPatientQuery, insertPatientQueryValues)
+          .then(whenInsertPatientQueryDone)
+          .catch(whenQueryError);
+      }
+    } else {
+      // validation logic for doctor signup
+      // get additional details of the doctor and check if doctor selected a clinic(s)
+      if ('clinicIds' in request.body) {
+        // if doctor selected at least 1 clinic, add the additional details
+        clinicIds = request.body.clinicIds;
+        bankNumber = request.body.bankNumber;
+        consultationPrice = request.body.consultationPrice;
+        doctorRegistrationNumber = request.body.doctorRegistrationNumber;
+      } else {
+        // else doctor did not select any clinics so give an invalid input message
+        invalidMessages.push('1 or more clinics need to be selected');
+      }
+
+      // check if the email already belongs to an existing user
+      if (result.rows.length > 0) {
+        // patient signup email already belongs to an existing user
+        // add message to inform user that email has been taken
+        invalidMessages.push('The email you entered already exists.');
+      }
+
+      if (result.rows.length > 0 || !('clinicIds' in request.body)) {
+        // email already belongs to an existing user and doctor did not select any clinics
+
+        // query for a list of clinics needed to render the doctor signup form again
+        const clinicsQuery = 'SELECT * FROM clinics';
+
+        // callback function for clinicsQuery
+        const whenClinicsQueryDone = (selectResult) => {
+          console.log('clinics query done!');
+
+          // store clinics data for ejs file
+          templateData.clinics = selectResult.rows;
+
+          // render the doctor signup form again with invalid form input messages
+          response.render('doctor-signup', templateData);
+        };
+
+        pool
+          .query(clinicsQuery)
+          .then(whenClinicsQueryDone)
+          .catch(whenQueryError);
+      } else {
+        // doctor signup email does not belong to an existing user
+        // so insert the new user details into database
+        // and redirect to route that renders doctor dashboard (app.get('/doctor-dashboard')
+
+        // variable to store the created doctor's id when insertDoctorQuery is done
+        let doctorId = '';
+
+        // query to insert new doctor details
+        const insertDoctorQuery = 'INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_number, credit_card_expiry, credit_card_cvv, bank_number, consultation_price_cents, doctor_registration_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *';
+
+        const insertDoctorQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`, `${bankNumber}`, `${consultationPrice}`, `${doctorRegistrationNumber}`];
+
+        // callback for insertDoctorQuery
+        const whenInsertDoctorQueryDone = (insertResult) => {
+          console.log('insert doctor query done');
+          console.table(insertResult.rows);
+
+          const user = insertResult.rows[0];
+
+          // variable to store the created doctor's id
+          doctorId = user.id;
+
+          // insert all the clinics' ids into clinic_doctors relational table -----
+          if (typeof (clinicIds) === 'string') {
+            // only 1 clinic was selected so change it into an array
+            const clinicId = clinicIds;
+            clinicIds = [clinicId];
+          }
+
+          // create and execute the insert query for each clinic selected
+          clinicIds.forEach((id) => {
+            const insertClinicAndDoctorIdsQuery = 'INSERT INTO clinic_doctors (clinic_id, doctor_id) VALUES ($1, $2)';
+
+            const insertClinicAndDoctorIdsQueryValues = [`${id}`, `${doctorId}`];
+
+            pool
+              .query(insertClinicAndDoctorIdsQuery, insertClinicAndDoctorIdsQueryValues)
+              .catch(whenQueryError);
+          });
+        };
+
+        // callback for insertClinicAndDoctorIdsQuery
+        const whenInsertClinicAndDoctorIdsQueryDone = () => {
+          console.log('insertClinicAndDoctorIdsQuery done!');
+          // generate a loggedInHash for user id ------
+          // create new SHA object
+          // eslint-disable-next-line new-cap
+          const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
+          // create an unhashed cookie string based on user ID and salt
+          const unhashedCookieString = `${doctorId}-${myEnvVar}`;
+          // generate a hashed cookie string using SHA object
+          shaObj.update(unhashedCookieString);
+          const hashedCookieString = shaObj.getHash('HEX');
+
+          // set the loggedInHash and userId cookies in the response
+          response.cookie('loggedInHash', hashedCookieString);
+          response.cookie('userId', doctorId);
+
+          // redirect to route that renders patient dashboard
+          response.redirect('/doctor-dashboard');
+        };
+
+        pool
+          .query(insertDoctorQuery, insertDoctorQueryValues)
+          .then(whenInsertDoctorQueryDone)
+          .then(whenInsertClinicAndDoctorIdsQueryDone)
+          .catch(whenQueryError);
+      }
+    }
+  };
+
+  // execute the queries for patient and doctor signup
+  pool
+    .query(isExistingUserQuery, isExistingUserQueryValues)
+    .then(whenIsExistingUserQueryDone)
+    .catch(whenQueryError);
+});
+// end of functionality for user to signup --------
 
 // render a patient dashboard
 app.get('/patient-dashboard', checkAuth, (request, response) => {

@@ -4,19 +4,12 @@ body {
 }
 
 #form-container {
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding: 20px;
 }
 
-input {
+input,
+textarea {
   border-color: rgb(0, 183, 255) !important;
-}
-
-.form-group,
-p,
-a {
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
 #brand-icon {
@@ -27,31 +20,12 @@ a {
   margin-bottom: 7px;
 }
 
-h4,
-h5 {
-  text-align: center;
-}
-
 h5 {
   color: rgb(0, 153, 255);
 }
 
-.btn {
-  margin-left: 10px;
-}
-
-h1 {
-  text-align: center;
-}
-
-#text-item-input {
-  height: 200px;
-}
-
-#messages-container {
-  height: 300px;
-  white-space: normal;
-  overflow: auto;
+#invalid-messages-list {
+  color: red;
 }
 
 @media (min-width: 992px) {

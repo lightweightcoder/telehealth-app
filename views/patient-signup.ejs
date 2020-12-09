@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+
+    <!-- My own css -->
+    <link rel="stylesheet" href="/signup.css" />
+
+    <title>Dr on the go</title>
+  </head>
+  <body>
+    <div class="container justify-content-center">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-8 border rounded" id="form-container">
+          <h5>Dr On The Go <img src="/healthcare.svg" id="brand-icon"/></h5>
+          
+          <h4>Create your Dr On The Go Account</h4>
+          <br />
+
+          <% if(typeof invalidMessages != 'undefined') { %>
+            <ul id="invalid-messages-list">           
+                <% invalidMessages.forEach((message) => { %>
+                <li><%= message %></li>
+                <% }); %>           
+            </ul>
+          <% } %>
+
+          <form action="/signup" method="POST">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" class="form-control" placeholder="Name" required />
+            </div>    
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Email" required />
+              </div>
+              <div class="form-group col-md-6">
+                <label for="password">Password</label>
+                <input type="text" id="password" name="password" class="form-control" placeholder="Min 5 characters" minlength="5" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="allergies">Allergies</label>
+              <textarea name="allergies" rows="1" class="form-control" placeholder="Enter nil if none" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="creditCardNumber">Credit card number</label>
+              <input type="number" id="creditCardNumber" name="creditCardNumber" class="form-control" placeholder="min 13 characters" min="1000000000000" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="creditCardExpiry">Credit card expiry</label>
+                <input type="text" id="creditCardExpiry" name="creditCardExpiry" class="form-control" placeholder="MM/YY" pattern="[0-1][1-9]\/[0-9]{2}" maxlength="5" required />
+              </div>
+              <div class="form-group col-md-6">
+                <label for="cvv">CVV</label>
+                <input type="number" id="cvv" name="cvv" class="form-control" min="100" max="999" placeholder="XXX" required />
+              </div>
+            </div>
+
+
+            <input type="submit" value="Sign Up" class="btn btn-primary" />
+          </form>
+          <hr />
+          <a href="/signup?identity=doctor" style="margin-right: 10px;">sign up as doctor instead</a>
+          <a href="/">login instead</a>
+        </div>
+      </div>
+    </div>
+
+<!-- footer -->
+<%- include('footer'); %>
