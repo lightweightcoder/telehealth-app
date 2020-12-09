@@ -1,0 +1,47 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 40px;
+}
+
+#profile-info-h4 {
+  display: inline-block;
+}
+
+#profile-photo {
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 150px;
+  height: 150px;
+  float: right;
+}
+
+#form-container {
+  padding: 20px;
+}
+
+input,
+textarea {
+  border-color: rgb(0, 183, 255) !important;
+}
+
+#brand-icon {
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 7px;
+}
+
+h5 {
+  color: rgb(0, 153, 255);
+}
+
+#invalid-messages-list {
+  color: red;
+}
+
+@media (min-width: 992px) {
+  #form-container {
+    width: 900px;
+  }
+}

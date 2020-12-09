@@ -182,9 +182,9 @@ app.post('/', (request, response) => {
       return;
     }
 
+    console.log('select user query done!');
+
     const user = result.rows[0];
-    console.log('type of user:', typeof (user));
-    console.log(result.rows);
 
     // verify input email and password with those in database
     if (result.rows.length !== 0) {
@@ -1528,6 +1528,82 @@ app.get('/doctor-consultations/:status', checkAuth, (request, response) => {
     .query(consultationsQuery)
     .then(whenConsultationsQueryDone)
     .catch(whenQueryError);
+});
+
+// accept a request to render a profile page
+app.get('/profile', checkAuth, (request, response) => {
+  console.log('request to render profile came in!');
+
+  const templateData = {};
+
+  // store user info for ejs file
+  // currently used for navbarBrand links in header.ejs and user's data for profile.ejs
+  templateData.user = request.user;
+  console.table(templateData.user);
+
+  // if user's photo field in database is empty, give it an anonymous photo
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
+
+  // variable to store clinic_ids of the doctor from clinic_doctors table
+  let doctorClinics = '';
+
+  // check if user is a doctor or patient
+  if (templateData.user.is_doctor === false) {
+    // user is patient, render the profile page
+    response.render('profile', templateData);
+  } else {
+    // user is doctor, make a database query to find clinics he/she is working at
+    const doctorClinicsQuery = `SELECT clinic_id FROM clinic_doctors WHERE doctor_id=${templateData.user.id}`;
+
+    const whenDoctorClinicsQueryDone = (result) => {
+      console.log('doctorClinicsQuery done!');
+      console.table(result.rows);
+
+      doctorClinics = result.rows;
+
+      // query for a list of clinics for checkboxes in profile.ejs
+      const clinicsQuery = 'SELECT * FROM clinics';
+
+      return pool.query(clinicsQuery);
+    };
+
+    const whenClinicsQueryDone = (result) => {
+      console.log('clinicsQuery done!');
+      console.table(result.rows);
+
+      const clinics = result.rows;
+
+      // give a notation if a clinic is where the doctor is working at
+      clinics.forEach((clinic) => {
+        doctorClinics.forEach((doctorClinic) => {
+          if (doctorClinic.clinic_id === clinic.id) {
+            // this clinic is where doctor works at so give a notation
+            clinic.isDoctorClinic = true;
+          }
+        });
+      });
+
+      // store the clinics' info for profile.ejs
+      templateData.clinics = clinics;
+
+      // render the profile page for the doctor
+      response.render('profile', templateData);
+    };
+
+    // callback function for query error
+    const whenQueryError = (error) => {
+      console.log('Error executing query', error.stack);
+      response.status(503).send(queryErrorMessage);
+    };
+
+    pool
+      .query(doctorClinicsQuery)
+      .then(whenDoctorClinicsQueryDone)
+      .then(whenClinicsQueryDone)
+      .catch(whenQueryError);
+  }
 });
 
 // set the port to listen for requests
