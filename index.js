@@ -1183,9 +1183,10 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
     medicine, quantity, instruction,
   } = request.body;
 
-  // get the medicine id
-  // only works for medicineId 1 to 9 due to slice method
-  const medicineId = medicine.slice(0, 1);
+  // get the medicine id and medicine price in cents
+  const medicineIdAndPrice = medicine.split('_');
+  const medicineId = medicineIdAndPrice[0];
+  const medicinePriceCents = Number(medicineIdAndPrice[1]);
 
   const insertPrescriptionQuery = 'INSERT INTO prescriptions (consultation_id, medicine_id, quantity, instruction) VALUES ($1, $2, $3, $4) RETURNING *';
 
@@ -1195,7 +1196,7 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
   const whenInsertPrescriptionQueryDone = (result) => {
     console.table(result.rows);
 
-    // to extract the consultation price
+    // to extract the consultation and accumulated medicine prices
     const selectConsultationPriceQuery = `SELECT consultation_price_cents, medicines_price_cents FROM consultations WHERE id=${consultationId}`;
 
     // execute the query
@@ -1205,10 +1206,9 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
   // callback function for selectConsultationPriceQuery
   const whenSelectConsultationPriceQueryDone = (result) => {
     console.table(result.rows);
+    console.log('selectConsultationPriceQUery done');
 
-    // get the medicine price and calculate total price of medicine and consultation ----
-    // only works for medicineId 1 to 9 due to slice method
-    const medicinePriceCents = Number(medicine.slice(2));
+    // calculate updated prices of medicines and for the whole consultation ----
     const medicinesPriceCents = medicinePriceCents * quantity;
     const consultationPriceCents = result.rows[0].consultation_price_cents;
     const accumulatedMedicinesPriceCents = result.rows[0].medicines_price_cents;
@@ -1217,16 +1217,18 @@ app.post('/consultation/:id/prescription', checkAuth, (request, response) => {
     const totalPriceCents = updatedAccumulatedMedicinesPriceCents + consultationPriceCents;
 
     // set the next query to update the total_price_cents and medicines_price_cents of the consult
-    const updateConsultationQuery = 'UPDATE consultations SET total_price_cents=$1, medicines_price_cents=$2 WHERE id=1';
+    const updateConsultationQuery = 'UPDATE consultations SET total_price_cents=$1, medicines_price_cents=$2 WHERE id=$3 RETURNING *';
 
-    const updateConsultationQueryValues = [totalPriceCents, updatedAccumulatedMedicinesPriceCents];
+    // eslint-disable-next-line max-len
+    const updateConsultationQueryValues = [totalPriceCents, updatedAccumulatedMedicinesPriceCents, consultationId];
 
     // execute the query
     return pool.query(updateConsultationQuery, updateConsultationQueryValues);
   };
 
-  const whenUpdateConsultationQueryDone = () => {
+  const whenUpdateConsultationQueryDone = (result) => {
     console.log('updated consultation total_price_cents and medicines_price_cents!');
+    console.table(result.rows);
 
     response.redirect(`/consultation/${consultationId}/edit`);
   };
@@ -1255,9 +1257,13 @@ app.put('/consultation/:id/prescription', checkAuth, (request, response) => {
   // get the updated medicine details from the form
   const { medicine } = request.body;
   const newMedicineQty = request.body.quantity;
-  // get the new medicine price and calculate total price of medicine ----
-  // only works for medicineId 1 to 9 due to slice method
-  const newMedicinePriceCents = Number(medicine.slice(2));
+
+  // get the updated medicine price and medicine id
+  const newMedicineIdAndPrice = medicine.split('_');
+  const newMedicineId = newMedicineIdAndPrice[0];
+  const newMedicinePriceCents = Number(newMedicineIdAndPrice[1]);
+
+  // calculate total price of updated medicine ----
   const newMedicinesPriceCents = newMedicinePriceCents * newMedicineQty;
 
   // for finding total medicine price of the old prescription
@@ -1277,17 +1283,13 @@ app.put('/consultation/:id/prescription', checkAuth, (request, response) => {
     oldMedicinePriceCents = result.rows[0].price_cents;
     oldMedicinesPriceCents = oldMedicineQty * oldMedicinePriceCents;
 
-    // get the medicine id
-    // only works for medicineId 1 to 9 due to slice method
-    const medicineId = medicine.slice(0, 1);
-
     // get the new instruction
     const newInstruction = request.body.instruction;
 
     // query to update the prescription in the database
     const updatePrescriptionQuery = `UPDATE prescriptions SET medicine_id=$1, quantity=$2, instruction=$3 WHERE id=${prescriptionId} RETURNING *`;
 
-    const updatePrescriptionQueryValues = [medicineId, newMedicineQty, `${newInstruction}`];
+    const updatePrescriptionQueryValues = [newMedicineId, newMedicineQty, `${newInstruction}`];
 
     // execute query to update the prescription
     return pool.query(updatePrescriptionQuery, updatePrescriptionQueryValues);
