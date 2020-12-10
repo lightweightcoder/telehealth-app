@@ -47,7 +47,7 @@
       <% if (user.is_doctor === true) { %>
         <div class="form-group">
           <label for="doctorRegistrationNumber">Doctor registration number</label>
-          <input type="number" id="doctorRegistrationNumber" name="doctorRegistrationNumber" class="form-control" value="<%= user.doctor_registration_number %>" required />
+          <input type="text" id="doctorRegistrationNumber" name="doctorRegistrationNumber" class="form-control" value="<%= user.doctor_registration_number %>" required />
         </div>
         <div class="form-group">
           <label>Select the clinics you work at</label><br />
@@ -71,12 +71,12 @@
         </div>
         <div class="form-group">
           <label for="bankNumber">Bank account number (to receive payments)</label>
-          <input type="number" id="bankNumber" name="bankNumber" class="form-control" placeholder="Bank account number" value="<%= user.bank_number %>" required />
+          <input type="text" id="bankNumber" name="bankNumber" class="form-control" placeholder="Bank account number" value="<%= user.bank_number %>" required />
         </div>
       <% } %>  
       <div class="form-group">
         <label for="creditCardNumber">Credit card number</label>
-        <input type="number" id="creditCardNumber" name="creditCardNumber" class="form-control" placeholder="min 13 characters" min="1000000000000" value="<%= user.credit_card_number %>" required />
+        <input type="text" id="creditCardNumber" name="creditCardNumber" class="form-control" placeholder="min 13 characters" minlength="13" value="<%= user.credit_card_number %>" required />
       </div>
       <div class="form-row">
         <div class="form-group col-md-6">
@@ -85,7 +85,7 @@
         </div>
         <div class="form-group col-md-6">
           <label for="cvv">CVV</label>
-          <input type="number" id="cvv" name="cvv" class="form-control" min="100" max="999" placeholder="XXX" value="<%= user.credit_card_cvv %>" required />
+          <input type="text" id="cvv" name="cvv" class="form-control" minlength="3" maxlength="4" placeholder="XXX or XXXX" value="<%= user.credit_card_cvv %>" required />
         </div>
       </div>
 

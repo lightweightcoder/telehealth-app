@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "users" (
   "allergies" TEXT NOT NULL,
   "credit_card_number" TEXT NOT NULL,
   "credit_card_expiry" TEXT NOT NULL,
-  "credit_card_cvv" INT NOT NULL,
+  "credit_card_cvv" TEXT NOT NULL,
   "bank_number" TEXT,
   "consultation_price_cents" INT,
   PRIMARY KEY ("id")

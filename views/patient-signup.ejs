@@ -59,7 +59,7 @@
             </div>
             <div class="form-group">
               <label for="creditCardNumber">Credit card number</label>
-              <input type="number" id="creditCardNumber" name="creditCardNumber" class="form-control" placeholder="min 13 characters" min="1000000000000" required />
+              <input type="text" id="creditCardNumber" name="creditCardNumber" class="form-control" placeholder="min 13 characters" minlength="13" required />
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
@@ -68,7 +68,7 @@
               </div>
               <div class="form-group col-md-6">
                 <label for="cvv">CVV</label>
-                <input type="number" id="cvv" name="cvv" class="form-control" min="100" max="999" placeholder="XXX" required />
+                <input type="text" id="cvv" name="cvv" class="form-control" minlength="3" maxlength="4" placeholder="XXX or XXXX" required />
               </div>
             </div>
 
