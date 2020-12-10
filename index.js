@@ -1905,5 +1905,15 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
     .catch(whenQueryError);
 });
 
+// accept a logout request
+app.get('/logout', (request, response) => {
+  console.log('request to logout came in');
+
+  response.clearCookie('userId');
+  response.clearCookie('loggedInHash');
+
+  response.redirect('/');
+});
+
 // set the port to listen for requests
 app.listen(PORT);
