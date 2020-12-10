@@ -19,15 +19,14 @@ ALTER TABLE consultations ADD COLUMN medicines_price_cents INT;
 ALTER TABLE users ADD COLUMN consultation_price_cents INT;
 
 UPDATE users SET consultation_price_cents=1050 WHERE id=1;
-UPDATE users SET photo=null WHERE id=1;
 
 UPDATE consultations SET consultation_price_cents=1050 WHERE id=1;
-UPDATE consultations SET total_price_cents=1050 WHERE id=1;
-UPDATE consultations SET medicines_price_cents=0 WHERE id=1;
+UPDATE consultations SET total_price_cents=1000 WHERE id=3;
+UPDATE consultations SET medicines_price_cents=0 WHERE id=3;
 
 UPDATE consultations SET status='ongoing' WHERE id=1;
 
-UPDATE users SET name='user3', email='user3@gmail.com' WHERE id=3 RETURNING *;
+UPDATE users SET photo=null WHERE id IN (1, 3);
 
 
 

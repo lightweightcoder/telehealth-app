@@ -106,7 +106,7 @@ const getHash = (input) => {
  * @param {object} request - route response
  * @param {function} next - next middleware function of app.
  */
-const checkAuth = ((request, response, next) => {
+const checkAuth = (request, response, next) => {
   // set the default value
   request.middlewareLoggedIn = false;
 
@@ -135,6 +135,7 @@ const checkAuth = ((request, response, next) => {
         const user = result.rows[0];
         request.user = user;
 
+        console.log('checked Auth!');
         next();
       });
 
@@ -150,7 +151,7 @@ const checkAuth = ((request, response, next) => {
   // if there is no loggedInHash & userId cookie, redirect to login page
   response.redirect('/');
   console.log('no loggedInHash & userId cookies found');
-});
+};
 
 // routes ==============================
 
