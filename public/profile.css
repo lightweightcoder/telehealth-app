@@ -3,16 +3,13 @@ body {
   padding-bottom: 40px;
 }
 
-#profile-info-h4 {
-  display: inline-block;
-}
-
 #profile-photo {
   background-size: cover;
   background-repeat: no-repeat;
-  width: 150px;
-  height: 150px;
-  float: right;
+}
+
+#profile-photo-div {
+  max-width: 227px;
 }
 
 #form-container {
@@ -42,6 +39,6 @@ h5 {
 
 @media (min-width: 992px) {
   #form-container {
-    width: 900px;
+    max-width: 900px;
   }
 }

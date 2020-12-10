@@ -293,7 +293,7 @@ app.post('/signup', (request, response) => {
   let consultationPrice = '';
   let doctorRegistrationNumber = '';
 
-  // queries -----------------------------------------------
+  // queries and callbacks---------------------------------------
   // callback function for query error
   const whenQueryError = (error) => {
     console.log('Error executing query', error.stack);
@@ -1539,7 +1539,6 @@ app.get('/profile', checkAuth, (request, response) => {
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs and user's data for profile.ejs
   templateData.user = request.user;
-  console.table(templateData.user);
 
   // if user's photo field in database is empty, give it an anonymous photo
   if (request.user.photo === null) {
@@ -1604,6 +1603,306 @@ app.get('/profile', checkAuth, (request, response) => {
       .then(whenClinicsQueryDone)
       .catch(whenQueryError);
   }
+});
+
+// accept a request to update a profile page
+app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response) => {
+  console.log('request to update profile came in!');
+
+  // check if user is a doctor or patient by checking if there is a 'bankNumber' input field
+  let isDoctor = false;
+  if ('bankNumber' in request.body) {
+    isDoctor = true;
+  }
+
+  // array to store messages for invalid form inputs
+  const invalidMessages = [];
+
+  // object that stores data to be inserted into ejs file
+  const templateData = {};
+  templateData.invalidMessages = invalidMessages;
+
+  // updated details (to be added to database) of the user
+  const {
+    name, email, password, allergies, creditCardNumber, creditCardExpiry, cvv,
+  } = request.body;
+
+  // if user updated a new photo, store the new photo hashed filename to update into database later
+  let newPhotoFileName = '';
+  if (request.file !== undefined) {
+    newPhotoFileName = request.file.filename;
+  }
+
+  // variables to store additionl details for doctors
+  let clinicIds = '';
+  let bankNumber = '';
+  let consultationPrice = '';
+  let doctorRegistrationNumber = '';
+
+  // queries and callbacks---------------------------------------
+  // callback function for query error
+  const whenQueryError = (error) => {
+    console.log('Error executing query', error.stack);
+    response.status(503).send(queryErrorMessage);
+  };
+
+  // for checking if email to update is already taken by another user ----
+  // query to check if email to update is already taken by another user
+  const isExistingUserQuery = 'SELECT * FROM users WHERE email=$1';
+
+  // values for isExistingUserQuery
+  const isExistingUserQueryValues = [`${email}`];
+
+  // callback function for isExistingUserQuery
+  const whenIsExistingUserQueryDone = (result) => {
+    console.log('existing user query done!');
+    console.table(result.rows);
+
+    if (isDoctor === false) {
+      // check if the email already belongs to an existing user who is not the logged in user
+      if (result.rows.length > 0 && result.rows[0].id !== request.user.id) {
+        // patient's new email already belongs to an existing user who is not the logged in user
+
+        // add message to inform user that email has been taken
+        invalidMessages.push('The email you entered already exists.');
+
+        // query for patient's details again to render into the profile form
+        const patientQuery = `SELECT * FROM users WHERE id='${request.user.id}'`;
+
+        // callback for patientQuery
+        const whenPatientQueryDone = (selectResult) => {
+          console.log('patient query done!');
+          console.table(selectResult.rows);
+
+          // store the patient data to render in profile.ejs
+          const user = selectResult.rows[0];
+          templateData.user = user;
+
+          // if user's photo field in database is empty, give it an anonymous photo
+          if (templateData.user.photo === null) {
+            templateData.user.photo = 'anonymous-person.jpg';
+          }
+
+          // render the patient profile again with invalid form input messages
+          response.render('profile', templateData);
+        };
+
+        pool
+          .query(patientQuery)
+          .then(whenPatientQueryDone)
+          .catch(whenQueryError);
+      } else {
+        // patient new email does not belong to an existing user who is not the logged in user
+        // so update the user new details into database
+        // and redirect to route that renders patient profile (app.get('/profile')
+
+        // query to update patient new details
+        let updatePatientQuery = '';
+        let updatePatientQueryValues = '';
+
+        // query changes depending whether patient uploaded a new photo
+        if (newPhotoFileName === '') {
+          // patient did not upload a new photo
+          updatePatientQuery = 'UPDATE users SET name=$1, email=$2, password=$3, is_doctor=$4, allergies=$5, credit_card_number=$6, credit_card_expiry=$7, credit_card_cvv=$8 WHERE id=$9 RETURNING *';
+
+          updatePatientQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`, `${request.user.id}`];
+        } else {
+          // patient uploaded a new photo
+          updatePatientQuery = 'UPDATE users SET name=$1, email=$2, password=$3, is_doctor=$4, allergies=$5, credit_card_number=$6, credit_card_expiry=$7, credit_card_cvv=$8, photo=$9 WHERE id=$10 RETURNING *';
+
+          updatePatientQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`, `${newPhotoFileName}`, `${request.user.id}`];
+        }
+
+        // callback for updatePatientQuery
+        const whenUpdatePatientQueryDone = (updateResult) => {
+          console.log('update patient query done');
+          console.table(updateResult.rows);
+
+          // redirect to route that renders patient profile
+          response.redirect('/profile');
+        };
+
+        pool
+          .query(updatePatientQuery, updatePatientQueryValues)
+          .then(whenUpdatePatientQueryDone)
+          .catch(whenQueryError);
+      }
+    } else {
+      // validation logic for updating doctor profile
+      // get additional details of the doctor and check if doctor selected a clinic(s)
+      if ('clinicIds' in request.body) {
+        // if doctor selected at least 1 clinic, add the additional details
+        clinicIds = request.body.clinicIds;
+        bankNumber = request.body.bankNumber;
+        consultationPrice = request.body.consultationPrice;
+        doctorRegistrationNumber = request.body.doctorRegistrationNumber;
+      } else {
+        // else doctor did not select any clinics so give an invalid input message
+        invalidMessages.push('1 or more clinics need to be selected');
+      }
+
+      // check if the email already belongs to an existing user who is not the logged in user
+      if (result.rows.length > 0 && result.rows[0].id !== request.user.id) {
+        // patient signup email already belongs to an existing user
+        // add message to inform user that email has been taken
+        invalidMessages.push('The email you entered already exists.');
+      }
+
+      if ((result.rows.length > 0 && result.rows[0].id !== request.user.id) || !('clinicIds' in request.body)) {
+        // email already belongs to an existing user who is not the logged in user
+        // or doctor did not select any clinics
+
+        // query for doctor's details again to render into the profile form
+        const doctorQuery = `SELECT * FROM users WHERE id='${request.user.id}'`;
+
+        // callback for doctorQuery
+        const whenDoctorQueryDone = (selectResult) => {
+          console.log('doctor query done!');
+          console.table(selectResult.rows);
+
+          // store the doctor data to render in profile.ejs
+          const user = selectResult.rows[0];
+          templateData.user = user;
+
+          // if user's photo field in database is empty, give it an anonymous photo
+          if (templateData.user.photo === null) {
+            templateData.user.photo = 'anonymous-person.jpg';
+          }
+
+          // make a database query to find clinics doctor is working at
+          const doctorClinicsQuery = `SELECT clinic_id FROM clinic_doctors WHERE doctor_id=${templateData.user.id}`;
+
+          // execute the next query
+          return pool.query(doctorClinicsQuery);
+        };
+
+        // variable to store clinic_ids of the doctor from clinic_doctors table
+        let doctorClinics = '';
+
+        const whenDoctorClinicsQueryDone = (selectResult) => {
+          console.log('doctorClinicsQuery done!');
+          console.table(selectResult.rows);
+
+          doctorClinics = selectResult.rows;
+
+          // query for a list of clinics for checkboxes in profile.ejs
+          const clinicsQuery = 'SELECT * FROM clinics';
+
+          return pool.query(clinicsQuery);
+        };
+
+        const whenClinicsQueryDone = (selectResult) => {
+          console.log('clinicsQuery done!');
+          console.table(selectResult.rows);
+
+          const clinics = selectResult.rows;
+
+          // give a notation if a clinic is where the doctor is working at
+          clinics.forEach((clinic) => {
+            doctorClinics.forEach((doctorClinic) => {
+              if (doctorClinic.clinic_id === clinic.id) {
+                // this clinic is where doctor works at so give a notation
+                clinic.isDoctorClinic = true;
+              }
+            });
+          });
+
+          // store the clinics' info for profile.ejs
+          templateData.clinics = clinics;
+
+          // render the profile page for the doctor
+          response.render('profile', templateData);
+        };
+
+        pool
+          .query(doctorQuery)
+          .then(whenDoctorQueryDone)
+          .then(whenDoctorClinicsQueryDone)
+          .then(whenClinicsQueryDone)
+          .catch(whenQueryError);
+      } else {
+        // doctor email to be updated does not belong to
+        // an existing user who is not the logged in user
+        // so update the user details in the database
+        // and redirect to route that renders doctor profile (app.get('/profile')
+
+        // query to update doctor's details
+        let updateDoctorQuery = '';
+        let updateDoctorQueryValues = '';
+
+        // update query changes depending whether doctor uploaded a new photo
+        if (newPhotoFileName === '') {
+          // doctor did not upload a new photo
+          updateDoctorQuery = 'UPDATE users SET name=$1, email=$2, password=$3, is_doctor=$4, allergies=$5, credit_card_number=$6, credit_card_expiry=$7, credit_card_cvv=$8, bank_number=$9, consultation_price_cents=$10, doctor_registration_number=$11 WHERE id=$12 RETURNING *';
+
+          updateDoctorQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`, `${bankNumber}`, `${consultationPrice}`, `${doctorRegistrationNumber}`, `${request.user.id}`];
+        } else {
+          // doctor uploaded a new photo
+          updateDoctorQuery = 'UPDATE users SET name=$1, email=$2, password=$3, is_doctor=$4, allergies=$5, credit_card_number=$6, credit_card_expiry=$7, credit_card_cvv=$8, bank_number=$9, consultation_price_cents=$10, doctor_registration_number=$11, photo=$12 WHERE id=$13 RETURNING *';
+
+          updateDoctorQueryValues = [`${name}`, `${email}`, `${password}`, isDoctor, `${allergies}`, `${creditCardNumber}`, `${creditCardExpiry}`, `${cvv}`, `${bankNumber}`, `${consultationPrice}`, `${doctorRegistrationNumber}`, `${newPhotoFileName}`, `${request.user.id}`];
+        }
+
+        // callback for updateDoctorQuery
+        const whenUpdateDoctorQueryDone = (updateResult) => {
+          console.log('update doctor query done');
+          console.table(updateResult.rows);
+
+          // query to delete all clinics doctor previously worked
+          // at (in the clinic_doctors table) before inserting updated data
+          const deleteClinicAndDoctorIdsQuery = `DELETE FROM clinic_doctors WHERE doctor_id=${request.user.id}`;
+
+          // execute the next query
+          return pool.query(deleteClinicAndDoctorIdsQuery);
+        };
+
+        // callback for deleteClinicAndDoctorIdsQuery
+        const whenDeleteClinicAndDoctorIdsQueryDone = () => {
+          console.log('deleteClinicAndDoctorIdsQuery done!');
+
+          // insert all the clinics' ids into clinic_doctors relational table -----
+          // check if only 1 or multiple clinics were selected
+          if (typeof (clinicIds) === 'string') {
+            // only 1 clinic was selected so change it into an array
+            const clinicId = clinicIds;
+            clinicIds = [clinicId];
+          }
+
+          // create and execute the insert query for each clinic selected
+          clinicIds.forEach((id) => {
+            const insertClinicAndDoctorIdsQuery = 'INSERT INTO clinic_doctors (clinic_id, doctor_id) VALUES ($1, $2)';
+
+            const insertClinicAndDoctorIdsQueryValues = [`${id}`, `${request.user.id}`];
+
+            pool
+              .query(insertClinicAndDoctorIdsQuery, insertClinicAndDoctorIdsQueryValues)
+              .catch(whenQueryError);
+          });
+        };
+
+        // callback for insertClinicAndDoctorIdsQuery
+        const whenInsertClinicAndDoctorIdsQueryDone = () => {
+          console.log('insertClinicAndDoctorIdsQuery done!');
+
+          // redirect to route that renders doctor's profile
+          response.redirect('/profile');
+        };
+
+        pool
+          .query(updateDoctorQuery, updateDoctorQueryValues)
+          .then(whenUpdateDoctorQueryDone)
+          .then(whenDeleteClinicAndDoctorIdsQueryDone)
+          .then(whenInsertClinicAndDoctorIdsQueryDone)
+          .catch(whenQueryError);
+      }
+    }
+  };
+
+  // execute the queries for patient and doctor signup
+  pool
+    .query(isExistingUserQuery, isExistingUserQueryValues)
+    .then(whenIsExistingUserQueryDone)
+    .catch(whenQueryError);
 });
 
 // set the port to listen for requests

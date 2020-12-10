@@ -27,6 +27,8 @@ UPDATE consultations SET medicines_price_cents=0 WHERE id=1;
 
 UPDATE consultations SET status='ongoing' WHERE id=1;
 
+UPDATE users SET name='user3', email='user3@gmail.com' WHERE id=3 RETURNING *;
+
 
 
 
