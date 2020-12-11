@@ -1,9 +1,15 @@
-/* profile photo is in header.ejs */
+/* for navbar in header.ejs */
 #profile-photo-span {
   padding-top: 5px;
   padding-bottom: 5px;
   width: 33px;
 }
+
+#profile-photo-img:hover {
+  border-width: 3px !important;
+  border-color: rgb(0 114 237) !important;
+}
+/* ----------------------------------------- */
 
 body {
   padding-top: 65px;
@@ -14,11 +20,6 @@ body {
 /* body {
   padding-top: 160px;
 } */
-
-#profile-photo {
-  background-size: cover;
-  background-repeat: no-repeat;
-}
 
 #profile-photo-div {
   max-width: 227px;
@@ -49,8 +50,24 @@ h5 {
   color: red;
 }
 
+/* for bootstrap col-sm */
+@media (min-width: 576px) {
+}
+
+/* for bootstrap col-md */
+@media (min-width: 768px) {
+  body {
+    padding-top: 65px;
+  }
+}
+
+/* for bootstrap col-lg */
 @media (min-width: 992px) {
   #form-container {
     max-width: 900px;
   }
+}
+
+/* for bootstrap col-xl */
+@media (min-width: 1200px) {
 }
