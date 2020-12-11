@@ -1,6 +1,10 @@
 <!-- header -->
 <%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
 
+<% if (user.is_doctor === true) { %>
+  <p style="font-style: italic;">You are in patient mode</p>
+<% }; %> 
+
 <a class="btn btn-primary" href="/clinics" role="button">new consult</a>
 
 <div class="container">

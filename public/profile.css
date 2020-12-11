@@ -1,7 +1,19 @@
+/* profile photo is in header.ejs */
+#profile-photo-span {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 33px;
+}
+
 body {
-  padding-top: 70px;
+  padding-top: 65px;
   padding-bottom: 40px;
 }
+
+/* uncomment the css for body below when jquery navbar is not working */
+/* body {
+  padding-top: 160px;
+} */
 
 #profile-photo {
   background-size: cover;

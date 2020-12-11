@@ -1,10 +1,36 @@
-body {
-  background-color: #f2dcbb;
-  padding-top: 60px;
-  padding-bottom: 40px;
-  color: black;
-  font-family: "Trebuchet MS", sans-serif;
+/* profile photo is in header.ejs */
+#profile-photo-span {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 33px;
 }
 
+body {
+  background-color: #f2dcbb;
+  padding-top: 65px;
+  padding-bottom: 40px;
+}
+
+/* uncomment the css for body below when jquery navbar is not working */
+/* body {
+  padding-top: 160px;
+} */
+
+/* for bootstrap col-sm */
+@media (min-width: 576px) {
+}
+
+/* for bootstrap col-md */
+@media (min-width: 768px) {
+  body {
+    padding-top: 65px;
+  }
+}
+
+/* for bootstrap col-lg */
 @media (min-width: 992px) {
+}
+
+/* for bootstrap col-xl */
+@media (min-width: 1200px) {
 }

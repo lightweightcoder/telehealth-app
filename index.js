@@ -206,6 +206,14 @@ app.post('/', (request, response) => {
         response.cookie('loggedInHash', hashedCookieString);
         response.cookie('userId', user.id);
 
+        // if user is a doctor, send a cookie to keep track of what mode the doctor is in
+        // the doctor starts in patient mode. This cookie will change the color of the navbar
+        // depending on the mode doctor is in. Give cookie any mode because it will always
+        // change to patient mode after redirecting to /patient-dashboard
+        if (user.is_doctor === true) {
+          response.cookie('mode', 'patient');
+        }
+
         // redirect user to patient dashboard
         response.redirect('/patient-dashboard');
       } else {
@@ -463,7 +471,10 @@ app.post('/signup', (request, response) => {
           response.cookie('loggedInHash', hashedCookieString);
           response.cookie('userId', doctorId);
 
-          // redirect to route that renders patient dashboard
+          // Give doctor a cookie to keep track of the mode he/she is in
+          response.cookie('mode', 'doctor');
+
+          // redirect to route that renders doctor dashboard for the doctor
           response.redirect('/doctor-dashboard');
         };
 
@@ -503,6 +514,23 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
     // store the consultations data
     templateData.consultations = result.rows;
 
+    // if user is doctor and user was in doctor mode, change to patient mode (in cookie)
+    // else user is patient so no need to set a mode
+    if (request.cookies.mode) {
+      if (request.cookies.mode === 'doctor') {
+        // doctor was in doctor mode so change to patient mode
+        response.cookie('mode', 'patient');
+      }
+    }
+
+    // set the navbar color for patient dashboard
+    templateData.navbarColor = '#e3f2fd';
+
+    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+    if (request.user.photo === null) {
+      templateData.user.photo = 'anonymous-person.jpg';
+    }
+
     response.render('patient-dashboard', templateData);
   };
 
@@ -538,6 +566,20 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
     // store the consultations data
     templateData.consultations = result.rows;
 
+    // if doctor was in patient mode, change to doctor mode (in cookie)
+    if (request.cookies.mode === 'patient') {
+      // doctor was in doctor mode so change to patient mode
+      response.cookie('mode', 'doctor');
+    }
+
+    // set the navbar color for doctor dashboard
+    templateData.navbarColor = 'rgb(248, 207, 159)';
+
+    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+    if (request.user.photo === null) {
+      templateData.user.photo = 'anonymous-person.jpg';
+    }
+
     response.render('doctor-dashboard', templateData);
   };
 
@@ -560,9 +602,17 @@ app.get('/clinics', checkAuth, (request, response) => {
 
   const templateData = {};
 
+  // for use in header.ejs
+  templateData.navbarColor = '#e3f2fd';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   const clinicsQuery = 'SELECT * FROM clinics';
 
@@ -590,9 +640,17 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
 
   const templateData = {};
 
+  // for use in header.ejs
+  templateData.navbarColor = '#e3f2fd';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   const clinicId = request.params.id;
 
@@ -643,9 +701,17 @@ app.get('/new-consultation/:clinicName/:doctorId', checkAuth, (request, response
 
   const templateData = {};
 
+  // for use in header.ejs
+  templateData.navbarColor = '#e3f2fd';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   // store the clinic name to display in a consultation
   templateData.clinicName = request.params.clinicName;
@@ -882,6 +948,22 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
       templateData.messages = result.rows;
     }
 
+    // set corressponding navbar color according to user's identity and mode
+    if (request.cookies.mode && request.cookies.mode === 'doctor') {
+      // doctor is in doctor mode
+      // set the navbar color for doctor mode
+      templateData.navbarColor = 'rgb(248, 207, 159)';
+    } else {
+      // user is in patient mode / patient is not a doctor
+      // set the navbar color
+      templateData.navbarColor = '#e3f2fd';
+    }
+
+    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+    if (request.user.photo === null) {
+      templateData.user.photo = 'anonymous-person.jpg';
+    }
+
     response.render('show-consultation', templateData);
   };
 
@@ -1000,9 +1082,17 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
 
   const templateData = {};
 
+  // set the navbar color for doctor mode
+  templateData.navbarColor = 'rgb(248, 207, 159)';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   // set messages to null so ejs will not return error if there are no messages for the consultation
   templateData.messages = null;
@@ -1451,9 +1541,17 @@ app.get('/patient-consultations/:status', checkAuth, (request, response) => {
 
   const templateData = {};
 
+  // set the navbar color for patient / patient mode
+  templateData.navbarColor = '#e3f2fd';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   const consultationStatus = request.params.status;
 
@@ -1495,9 +1593,17 @@ app.get('/doctor-consultations/:status', checkAuth, (request, response) => {
 
   const templateData = {};
 
+  // set the navbar color for patient / patient mode
+  templateData.navbarColor = 'rgb(248, 207, 159)';
+
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
+
+  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+  if (request.user.photo === null) {
+    templateData.user.photo = 'anonymous-person.jpg';
+  }
 
   const consultationStatus = request.params.status;
 
@@ -1546,6 +1652,23 @@ app.get('/profile', checkAuth, (request, response) => {
   // if user's photo field in database is empty, give it an anonymous photo
   if (request.user.photo === null) {
     templateData.user.photo = 'anonymous-person.jpg';
+  }
+
+  // if user is doctor and user is in doctor mode (in cookie)
+  // else user is patient / doctor is in patient mode so no need to set a mode
+  if (request.cookies.mode) {
+    if (request.cookies.mode === 'doctor') {
+      // doctor was in doctor mode
+      // set the navbar color for header.ejs
+      templateData.navbarColor = 'rgb(248, 207, 159)';
+    } else {
+      // doctor is in patient mode
+      // set the navbar color for header.ejs
+      templateData.navbarColor = '#e3f2fd';
+    }
+  } else {
+    // set the navbar color for header.ejs
+    templateData.navbarColor = '#e3f2fd';
   }
 
   // variable to store clinic_ids of the doctor from clinic_doctors table
@@ -1914,6 +2037,7 @@ app.get('/logout', (request, response) => {
 
   response.clearCookie('userId');
   response.clearCookie('loggedInHash');
+  response.clearCookie('mode');
 
   response.redirect('/');
 });
