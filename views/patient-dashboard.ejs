@@ -1,30 +1,82 @@
 <!-- header -->
 <%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
 
-<% if (user.is_doctor === true) { %>
-  <p style="font-style: italic;">You are in patient mode</p>
-<% }; %> 
+<!-- section with background image -->
+<div class="row" id="new-consult-row">
+  <% if (user.is_doctor === true) { %>
+    <div class="col-12" id="mode-message-col">
+      <p class="badge badge-pill badge-light" style="font-style: italic;">You are in patient mode</p>
+    </div>
+  <% }; %> 
 
-<a class="btn btn-primary" href="/clinics" role="button">new consult</a>
-
-<div class="container">
-  <div class="row">
-    <div class="col-12">
-      <h1>Patient Dashboard</h1>
+  <div class="col-12 d-flex justify-content-center">
+    <div class="row align-self-center">
+      <div class="col-12 d-flex justify-content-center">
+          <span id="new-consult-message">Looking for a teleconsult?</span>
+      </div>
+      <div class="col-12 d-flex justify-content-center">
+        <a class="btn btn-primary btn-sm" href="/clinics" role="button">Book one now</a>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- section with consultations -->
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h2>ongoing consultations</h2>
-      <% consultations.forEach((consultation) => { %>
+      <h4 id="patient-dashboard-heading">Patient Dashboard</h4>
+    </div>
+  </div>
+</div>
+
+<div class="container-lg">
+  <div class="row">
+    <div class="col-6">
+      <h5 class="badge badge-info" id="consults-badge">ongoing consultations</h5>
+    </div>
+    <div class="col-6" id="see-all-consults-link">
+      <a href="/patient-consultations/ongoing">see all ongoing consults</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <!-- set max size of the container storing the consultations -->
+      <div class="container">
+        <div class="row">
+          <!-- information of each consult -->
+          <% consultations.forEach((consultation) => { %>
+            <% if (consultation.status === 'ongoing') { %>
+              <div class="col-12 col-md-6 col-lg-4">            
+                <a class="consultation-anchor" href="/consultation/<%= consultation.id %>">
+                  <div class="container border border-info rounded consultation-container">
+                    <div class="row">
+                      <div class="col-4 d-flex align-items-center">
+                        <img class="rounded-circle border border-secondary img-fluid doctor-photo" src="/profile-photos/<%= consultation.doctor_photo %>"/>
+                      </div>
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="consultation-doctor-name">Dr <%= consultation.doctor_name %></p>
+                      </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                      <div class="col-12 d-flex align-items-center"><p class="consultation-date">consult date: <%= consultation.date %></p></div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            <% } %> 
+          <% }); %> 
+        </div>
+      </div>
+
+
+      <!-- <% consultations.forEach((consultation) => { %>
         <% if (consultation.status === 'ongoing') { %>
           <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
         <% } %> 
-      <% }); %> 
-      <a href="/patient-consultations/ongoing">see all ongoing consults</a>
+      <% }); %>  -->
+      
     </div>
   </div>
 </div>

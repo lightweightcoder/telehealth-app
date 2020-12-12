@@ -5,13 +5,18 @@
   width: 33px;
 }
 
+#profile-photo-img {
+  border-width: 3px !important;
+}
+
 #profile-photo-img:hover {
   border-width: 3px !important;
-  border-color: rgb(0 114 237) !important;
+  border-color: #a3a7ab !important;
 }
 /* ----------------------------------------- */
 
 body {
+  background-color: #efefef;
   padding-top: 65px;
   padding-bottom: 40px;
 }

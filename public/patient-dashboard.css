@@ -5,14 +5,19 @@
   width: 33px;
 }
 
+#profile-photo-img {
+  border-color: #a1dbf1 !important;
+  border-width: 3px !important;
+}
+
 #profile-photo-img:hover {
   border-width: 3px !important;
-  border-color: rgb(0 114 237) !important;
+  border-color: #00b6bc !important;
 }
 /* ----------------------------------------- */
 
 body {
-  background-color: #f2dcbb;
+  background-color: #efefef;
   padding-top: 65px;
   padding-bottom: 40px;
 }
@@ -22,8 +27,76 @@ body {
   padding-top: 160px;
 } */
 
+#new-consult-row {
+  background: linear-gradient(rgba(124, 89, 89, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/new-consult-background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 200px;
+  background-position: 30% 30%;
+}
+
+#mode-message-col {
+  height: 15px;
+}
+
+#new-consult-message {
+  font-size: 1.2rem;
+  text-align: center;
+  color: white;
+  margin-bottom: 10px;
+}
+
+#patient-dashboard-heading {
+  margin-top: 0.5rem;
+}
+
+#see-all-consults-link {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#consults-badge,
+#see-all-consults-link {
+  font-size: 0.5rem;
+}
+
+.consultation-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.consultation-anchor:hover {
+  color: #00b6bc;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.consultation-container {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 1rem;
+  background-color: #e4f4f3;
+}
+
+.consultation-doctor-name {
+  margin-bottom: 0;
+}
+
+.consultation-date {
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
 /* for bootstrap col-sm */
 @media (min-width: 576px) {
+  #see-all-consults-link {
+    font-size: 1rem;
+  }
+
+  #consults-badge {
+    font-size: 75%;
+  }
 }
 
 /* for bootstrap col-md */

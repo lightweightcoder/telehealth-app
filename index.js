@@ -514,6 +514,20 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
     // store the consultations data
     templateData.consultations = result.rows;
 
+    // format the date of the consultation and photo of the doctor (if no photo)
+    templateData.consultations.forEach((consultation) => {
+      // if doctor's photo field in database is empty,
+      // give it an anonymous photo for display
+      if (consultation.doctor_photo === null) {
+        consultation.doctor_photo = 'anonymous-person.jpg';
+      }
+
+      // convert the consultation date to the display format (DD/MM/YYYY)
+      const rawDate = consultation.date;
+      const formattedDate = moment(rawDate).format('DD-MMM-YYYY, h:mm a');
+      consultation.date = formattedDate;
+    });
+
     // if user is doctor and user was in doctor mode, change to patient mode (in cookie)
     // else user is patient so no need to set a mode
     if (request.cookies.mode) {
@@ -565,6 +579,20 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
 
     // store the consultations data
     templateData.consultations = result.rows;
+
+    // format the date of the consultation and photo of the patient (if no photo)
+    templateData.consultations.forEach((consultation) => {
+      // if patient's photo field in database is empty,
+      // give it an anonymous photo for display
+      if (consultation.patient_photo === null) {
+        consultation.patient_photo = 'anonymous-person.jpg';
+      }
+
+      // convert the consultation date to the display format (DD/MM/YYYY)
+      const rawDate = consultation.date;
+      const formattedDate = moment(rawDate).format('DD-MMM-YYYY, h:mm a');
+      consultation.date = formattedDate;
+    });
 
     // if doctor was in patient mode, change to doctor mode (in cookie)
     if (request.cookies.mode === 'patient') {
