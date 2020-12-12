@@ -30,6 +30,8 @@
   </div>
 </div>
 
+<!-- 1 container per status -->
+<!-- ongoing -->
 <div class="container-lg">
   <div class="row">
     <div class="col-6">
@@ -42,7 +44,7 @@
   <div class="row">
     <div class="col-12">
       <!-- set max size of the container storing the consultations -->
-      <div class="container">
+      <div class="container consultations-container overflow-auto">
         <div class="row">
           <!-- information of each consult -->
           <% consultations.forEach((consultation) => { %>
@@ -68,57 +70,142 @@
             <% } %> 
           <% }); %> 
         </div>
-      </div>
-
-
-      <!-- <% consultations.forEach((consultation) => { %>
-        <% if (consultation.status === 'ongoing') { %>
-          <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
-        <% } %> 
-      <% }); %>  -->
-      
+      </div>      
     </div>
   </div>
 </div>
+<hr>
 
-<div class="container">
+<!-- requested -->
+<div class="container-lg">
   <div class="row">
-    <div class="col-12">
-      <h2>requested consultations</h2>
-      <% consultations.forEach((consultation) => { %>
-        <% if (consultation.status === 'requested') { %>
-          <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
-        <% } %> 
-      <% }); %> 
+    <div class="col-6">
+      <h5 class="badge badge-info" id="consults-badge">requested consultations</h5>
+    </div>
+    <div class="col-6" id="see-all-consults-link">
       <a href="/patient-consultations/requested">see all requested consults</a>
     </div>
   </div>
-</div>
-
-<div class="container">
   <div class="row">
     <div class="col-12">
-      <h2>upcoming consultations</h2>
-      <% consultations.forEach((consultation) => { %>
-        <% if (consultation.status === 'upcoming') { %>
-          <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
-        <% } %> 
-      <% }); %> 
-      <a href="/patient-consultations/upcoming">see all upcoming consults</a>
+      <!-- set max size of the container storing the consultations -->
+      <div class="container consultations-container overflow-auto">
+        <div class="row">
+          <!-- information of each consult -->
+          <% consultations.forEach((consultation) => { %>
+            <% if (consultation.status === 'requested') { %>
+              <div class="col-12 col-md-6 col-lg-4">            
+                <a class="consultation-anchor" href="/consultation/<%= consultation.id %>">
+                  <div class="container border border-info rounded consultation-container">
+                    <div class="row">
+                      <div class="col-4 d-flex align-items-center">
+                        <img class="rounded-circle border border-secondary img-fluid doctor-photo" src="/profile-photos/<%= consultation.doctor_photo %>"/>
+                      </div>
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="consultation-doctor-name">Dr <%= consultation.doctor_name %></p>
+                      </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                      <div class="col-12 d-flex align-items-center"><p class="consultation-date">consult date: <%= consultation.date %></p></div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            <% } %> 
+          <% }); %> 
+        </div>
+      </div>
     </div>
   </div>
 </div>
+<hr>
 
-<div class="container">
+<!-- upcoming -->
+<div class="container-lg">
+  <div class="row">
+    <div class="col-6">
+      <h5 class="badge badge-info" id="consults-badge">upcoming consultations</h5>
+    </div>
+    <div class="col-6" id="see-all-consults-link">
+      <a href="/patient-consultations/upcoming">see all upcoming consults</a>
+    </div>
+  </div>
   <div class="row">
     <div class="col-12">
-      <h2>past consultations</h2>
-      <% consultations.forEach((consultation) => { %>
-        <% if (consultation.status === 'ended') { %>
-          <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> doctor: <%= consultation.doctor_name %></a></p>
-        <% } %> 
-      <% }); %> 
-      <a href="/patient-consultations/ended">see all past consults</a>
+      <!-- set max size of the container storing the consultations -->
+      <div class="container consultations-container overflow-auto">
+        <div class="row">
+          <!-- information of each consult -->
+          <% consultations.forEach((consultation) => { %>
+            <% if (consultation.status === 'upcoming') { %>
+              <div class="col-12 col-md-6 col-lg-4">            
+                <a class="consultation-anchor" href="/consultation/<%= consultation.id %>">
+                  <div class="container border border-info rounded consultation-container">
+                    <div class="row">
+                      <div class="col-4 d-flex align-items-center">
+                        <img class="rounded-circle border border-secondary img-fluid doctor-photo" src="/profile-photos/<%= consultation.doctor_photo %>"/>
+                      </div>
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="consultation-doctor-name">Dr <%= consultation.doctor_name %></p>
+                      </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                      <div class="col-12 d-flex align-items-center"><p class="consultation-date">consult date: <%= consultation.date %></p></div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            <% } %> 
+          <% }); %> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+
+<!-- past (ended) -->
+<div class="container-lg">
+  <div class="row">
+    <div class="col-6">
+      <h5 class="badge badge-info" id="consults-badge">past consultations</h5>
+    </div>
+    <div class="col-6" id="see-all-consults-link">
+      <a href="/patient-consultations/ended">see all ended consults</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <!-- set max size of the container storing the consultations -->
+      <div class="container consultations-container overflow-auto">
+        <div class="row">
+          <!-- information of each consult -->
+          <% consultations.forEach((consultation) => { %>
+            <% if (consultation.status === 'ended') { %>
+              <div class="col-12 col-md-6 col-lg-4">            
+                <a class="consultation-anchor" href="/consultation/<%= consultation.id %>">
+                  <div class="container border border-info rounded consultation-container">
+                    <div class="row">
+                      <div class="col-4 d-flex align-items-center">
+                        <img class="rounded-circle border border-secondary img-fluid doctor-photo" src="/profile-photos/<%= consultation.doctor_photo %>"/>
+                      </div>
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="consultation-doctor-name">Dr <%= consultation.doctor_name %></p>
+                      </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                      <div class="col-12 d-flex align-items-center"><p class="consultation-date">consult date: <%= consultation.date %></p></div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            <% } %> 
+          <% }); %> 
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -61,6 +61,10 @@ body {
   font-size: 0.5rem;
 }
 
+.consultations-container {
+  max-height: 400px;
+}
+
 .consultation-anchor {
   color: inherit;
   text-decoration: none;
