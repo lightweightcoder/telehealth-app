@@ -1,16 +1,47 @@
 <!-- header -->
-<%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
+<%- include('header', {cssFilePath: '/doctor-consultations.css'}); %>
 
+<!-- section with consultations -->
 <div class="container">
   <div class="row">
-    <div class="col-12">
-      <h2><%= consultationStatus %> consultations</h2>
-      <% consultations.forEach((consultation) => { %>
-        <p><a class="badge badge-light" href="/consultation/<%= consultation.id %>">consultation <%= consultation.id %> patient: <%= consultation.patient_name %></a></p>
-      <% }); %> 
+    <div class="col-12">  
+        <h6 id="consultations-list-heading"><%= consultationStatus %> consultations</h6>
     </div>
   </div>
 </div>
+
+<div class="container-lg">
+  <div class="row">
+    <div class="col-12">
+      <!-- set max height of the container storing the consultations -->
+      <div class="container consultations-container overflow-auto">
+        <div class="row">
+          <!-- information of each consult -->
+          <% consultations.forEach((consultation) => { %>
+            <div class="col-12 col-md-6 col-lg-4">            
+              <a class="consultation-anchor" href="/consultation/<%= consultation.id %>">
+                <div class="container border border-info rounded consultation-container">
+                  <div class="row">
+                    <div class="col-4 d-flex align-items-center">
+                      <img class="rounded-circle border border-secondary img-fluid" src="/profile-photos/<%= consultation.patient_photo %>"/>
+                    </div>
+                    <div class="col-8 d-flex align-items-center">
+                      <p><%= consultation.patient_name %></p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12 d-flex align-items-center consultation-date-col"><p class="consultation-date">consult date: <%= consultation.date %></p></div>
+                  </div>
+                </div>
+              </a>
+            </div>            
+          <% }); %> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- footer -->
 <%- include('footer'); %>

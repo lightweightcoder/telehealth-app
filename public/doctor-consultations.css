@@ -1,0 +1,92 @@
+/* for navbar in header.ejs */
+#profile-photo-span {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 33px;
+}
+
+#profile-photo-img {
+  border-color: #e7f2f8 !important;
+  border-width: 3px !important;
+}
+
+#profile-photo-img:hover {
+  border-width: 3px !important;
+  border-color: #ffa384 !important;
+}
+/* ----------------------------------------- */
+
+body {
+  background-color: #efefef;
+  padding-top: 65px;
+  padding-bottom: 40px;
+}
+
+/* uncomment the css for body below when jquery navbar is not working */
+/* body {
+  padding-top: 160px;
+} */
+
+#consultations-list-heading {
+  margin-top: 0.5rem;
+}
+
+.consultations-container {
+  max-height: 800px;
+}
+
+.consultation-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.consultation-anchor:hover {
+  color: #ffa384;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.consultation-container {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background-color: #efe7bc;
+  border-color: #ffa384 !important;
+}
+
+.consultation-container p {
+  margin-bottom: 0;
+}
+
+.consultation-date-col {
+  margin-top: 0.5rem;
+  border-color: #ffa384;
+  border-width: 1px;
+  border-top-style: dotted;
+  padding-top: 0.5rem;
+}
+
+.consultation-date {
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+/* for bootstrap col-sm */
+@media (min-width: 576px) {
+}
+
+/* for bootstrap col-md */
+@media (min-width: 768px) {
+  body {
+    padding-top: 65px;
+  }
+}
+
+/* for bootstrap col-lg */
+@media (min-width: 992px) {
+}
+
+/* for bootstrap col-xl */
+@media (min-width: 1200px) {
+}
