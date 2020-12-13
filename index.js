@@ -601,7 +601,7 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
     }
 
     // set the navbar color for doctor dashboard
-    templateData.navbarColor = 'rgb(248, 207, 159)';
+    templateData.navbarColor = '#FBE7C6';
 
     // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
     if (request.user.photo === null) {
@@ -980,7 +980,7 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
     if (request.cookies.mode && request.cookies.mode === 'doctor') {
       // doctor is in doctor mode
       // set the navbar color for doctor mode
-      templateData.navbarColor = 'rgb(248, 207, 159)';
+      templateData.navbarColor = '#FBE7C6';
     } else {
       // user is in patient mode / patient is not a doctor
       // set the navbar color
@@ -1111,7 +1111,7 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
   const templateData = {};
 
   // set the navbar color for doctor mode
-  templateData.navbarColor = 'rgb(248, 207, 159)';
+  templateData.navbarColor = '#FBE7C6';
 
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
@@ -1622,7 +1622,7 @@ app.get('/doctor-consultations/:status', checkAuth, (request, response) => {
   const templateData = {};
 
   // set the navbar color for patient / patient mode
-  templateData.navbarColor = 'rgb(248, 207, 159)';
+  templateData.navbarColor = '#FBE7C6';
 
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
@@ -1688,7 +1688,7 @@ app.get('/profile', checkAuth, (request, response) => {
     if (request.cookies.mode === 'doctor') {
       // doctor was in doctor mode
       // set the navbar color for header.ejs
-      templateData.navbarColor = 'rgb(248, 207, 159)';
+      templateData.navbarColor = '#FBE7C6';
     } else {
       // doctor is in patient mode
       // set the navbar color for header.ejs

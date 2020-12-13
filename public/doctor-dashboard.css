@@ -6,13 +6,13 @@
 }
 
 #profile-photo-img {
-  border-color: #a1dbf1 !important;
+  border-color: #e7f2f8 !important;
   border-width: 3px !important;
 }
 
 #profile-photo-img:hover {
   border-width: 3px !important;
-  border-color: #00b6bc !important;
+  border-color: #ffa384 !important;
 }
 /* ----------------------------------------- */
 
@@ -41,13 +41,6 @@ body {
   margin-left: 5px;
 }
 
-#new-consult-message {
-  font-size: 1.2rem;
-  text-align: center;
-  color: white;
-  margin-bottom: 10px;
-}
-
 #dashboard-heading {
   margin-top: 0.5rem;
 }
@@ -57,9 +50,15 @@ body {
   justify-content: flex-end;
 }
 
-#consults-badge,
-#see-all-consults-link {
+#consults-badge {
   font-size: 0.5rem;
+  background-color: #ffa384;
+}
+
+#see-all-consults-link {
+  display: contents;
+  font-size: 0.5rem;
+  color: #ffa384;
 }
 
 .consultations-container {
@@ -72,7 +71,7 @@ body {
 }
 
 .consultation-anchor:hover {
-  color: #00b6bc;
+  color: #ffa384;
   text-decoration: none;
   cursor: pointer;
 }
@@ -82,7 +81,8 @@ body {
   margin-bottom: 5px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  background-color: #e4f4f3;
+  background-color: #efe7bc;
+  border-color: #ffa384 !important;
 }
 
 .consultation-container p {
@@ -91,7 +91,7 @@ body {
 
 .consultation-date-col {
   margin-top: 0.5rem;
-  border-color: #17a2b8;
+  border-color: #ffa384;
   border-width: 1px;
   border-top-style: dotted;
   padding-top: 0.5rem;

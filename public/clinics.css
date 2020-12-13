@@ -27,57 +27,26 @@ body {
   padding-top: 160px;
 } */
 
-#new-consult-row {
-  background: linear-gradient(rgba(124, 89, 89, 0.5), rgba(0, 0, 0, 0.5)),
-    url("/new-consult-background.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  height: 200px;
-  background-position: 30% 30%;
-}
-
-#mode-message {
-  font-style: italic;
-  margin-left: 5px;
-}
-
-#new-consult-message {
-  font-size: 1.2rem;
-  text-align: center;
-  color: white;
-  margin-bottom: 10px;
-}
-
-#dashboard-heading {
+#select-clinic-heading {
   margin-top: 0.5rem;
 }
 
-#see-all-consults-link-col {
-  display: flex;
-  justify-content: flex-end;
-}
-
-#consults-badge,
-#see-all-consults-link {
-  font-size: 0.5rem;
-}
-
-.consultations-container {
+.clinics-container {
   max-height: 400px;
 }
 
-.consultation-anchor {
+.clinic-anchor {
   color: inherit;
   text-decoration: none;
 }
 
-.consultation-anchor:hover {
+.clinic-anchor:hover {
   color: #00b6bc;
   text-decoration: none;
   cursor: pointer;
 }
 
-.consultation-container {
+.clinic-container {
   margin-top: 5px;
   margin-bottom: 5px;
   padding-top: 0.5rem;
@@ -85,11 +54,11 @@ body {
   background-color: #e4f4f3;
 }
 
-.consultation-container p {
+.clinic-container p {
   margin-bottom: 0;
 }
 
-.consultation-date-col {
+.clinic-address-col {
   margin-top: 0.5rem;
   border-color: #17a2b8;
   border-width: 1px;
@@ -97,20 +66,13 @@ body {
   padding-top: 0.5rem;
 }
 
-.consultation-date {
+.clinic-address {
   font-style: italic;
   font-size: 0.8rem;
 }
 
 /* for bootstrap col-sm */
 @media (min-width: 576px) {
-  #see-all-consults-link {
-    font-size: 0.75rem;
-  }
-
-  #consults-badge {
-    font-size: 75%;
-  }
 }
 
 /* for bootstrap col-md */

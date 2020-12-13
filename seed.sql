@@ -14,10 +14,10 @@ INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_numb
 INSERT INTO users (name, email, password, is_doctor, allergies, credit_card_number, credit_card_expiry, credit_card_cvv) VALUES ('Jackie Chan', 'patient3@gmail.com', 'patient3', FALSE, 'beans', '1234567891013', '03/24', '203');
 
 -- clinics --
-INSERT INTO clinics (name, photo, address) VALUES ('Pinnacle Family Clinic', 'pinnacle', 'blk 765 sengkang east road');
-INSERT INTO clinics (name, photo, address) VALUES ('Mutal Healthcare', 'mutual', 'blk 500 shenton road');
-INSERT INTO clinics (name, photo, address) VALUES ('Faith Healthcare', 'faith', 'blk 400 tampines east street');
-INSERT INTO clinics (name, photo, address) VALUES ('My Family Clinic', 'my-family', 'blk 600 hougang way');
+INSERT INTO clinics (name, photo, address) VALUES ('Pinnacle Family Clinic', 'pinnacle.jpg', 'blk 765 sengkang east road');
+INSERT INTO clinics (name, photo, address) VALUES ('Mutal Healthcare', 'mutual.jpg', 'blk 500 shenton road');
+INSERT INTO clinics (name, photo, address) VALUES ('Faith Healthcare', 'faith.jpg', 'blk 400 tampines east street');
+INSERT INTO clinics (name, photo, address) VALUES ('My Family Clinic', 'my-family.jpg', 'blk 600 hougang way');
 
 -- clinic_doctors --
 INSERT INTO clinic_doctors (clinic_id, doctor_id) VALUES (1, 1);

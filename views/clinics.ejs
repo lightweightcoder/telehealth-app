@@ -1,19 +1,45 @@
 <!-- header -->
-<%- include('header', {cssFilePath: '/patient-dashboard.css'}); %>
+<%- include('header', {cssFilePath: '/clinics.css'}); %>
 
-<div class="container" id="clinics-list-container">
+<!-- section with clinics -->
+<div class="container">
   <div class="row">
-    <div class="col-12" id="clinics-list">
-      <ul id="clinics-list-items">
-        <% clinics.forEach(function(clinic) { %>
-        <li>
-          <p><%= clinic.name %></p>
-          <a href="/clinics/<%= clinic.id %>"
-            >select</a
-          >
-        </li>
-        <% }); %>
-      </ul>
+    <div class="col-12">
+      <h4 id="select-clinic-heading">Select a Clinic</h4>
+    </div>
+  </div>
+</div>
+
+<div class="container-lg">
+  <div class="row">
+    <div class="col-12">
+      <!-- set max height of the container storing the clinics -->
+      <div class="container clinics-container overflow-auto">
+        <div class="row">
+          <!-- information of each clinic -->
+          <% clinics.forEach((clinic) => { %>
+              <div class="col-12 col-md-6 col-lg-4">            
+                <a class="clinic-anchor" href="/clinics/<%= clinic.id %>">
+                  <div class="container border border-info rounded clinic-container">
+                    <div class="row">
+                      <div class="col-4 d-flex align-items-center">
+                        <img class="rounded border border-secondary img-fluid" src="/clinics/<%= clinic.photo %>"/>
+                      </div>
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="clinic-name">
+                          <%= clinic.name %>
+                        </p>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12 d-flex align-items-center clinic-address-col"><p class="clinic-address">Address: <%= clinic.address %></p></div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+          <% }); %> 
+        </div>
+      </div>      
     </div>
   </div>
 </div>
