@@ -79,12 +79,21 @@ body {
 .consultation-container {
   margin-top: 5px;
   margin-bottom: 5px;
-  padding-top: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   background-color: #e4f4f3;
 }
 
-.consultation-doctor-name {
+.consultation-container p {
   margin-bottom: 0;
+}
+
+.consultation-date-col {
+  margin-top: 0.5rem;
+  border-color: #17a2b8;
+  border-width: 1px;
+  border-top-style: dotted;
+  padding-top: 0.5rem;
 }
 
 .consultation-date {
