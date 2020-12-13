@@ -1,11 +1,17 @@
 <!-- header -->
-<%- include('header', {cssFilePath: '/login.css'}); %>
+<%- include('header', {cssFilePath: '/edit-consultation.css'}); %>
+
+<div class="row">
+  <div class="col-12">
+    <h4 id="consultation-details-heading">Consultation Details</h4>
+  </div>
+</div>
 
 <!-- static consultation details -->
-<div class="container" id="form-container">
+<div class="container" id="general-details-form-container">
   <div class="row">
     <div class="col-12">
-      <h1>Consultation Details</h1>
+      <h5>General Details</h5>
     </div>
   </div>
 
@@ -57,7 +63,7 @@
 <div class="container" id="diagnosis-container">
   <div class="row">
     <div class="col-12">
-      <h6>diagnosis</h6>
+      <h5>Diagnosis</h5>
       <form action="/consultation/<%= consultation.id %>/diagnosis?_method=PUT" method="POST">
         <% if (consultation.diagnosis === null) { %>
           <textarea name="diagnosis" rows="2" class="form-control" placeholder="enter diagnosis"></textarea>
@@ -73,25 +79,26 @@
   
 
 <!-- prescriptions -->
-<div class="container">
+<div class="container" id="prescriptions-container">
   <div class="row">
     <div class="col-12">
-      <h4>Prescriptions</h4>
+      <h5>Prescriptions</h5>
     </div>
   </div>
-</div>
 
-<!-- created prescriptions -->
-<% if ('prescriptions' in consultation) { %> 
+  <!-- created prescriptions -->
+  <% if ('prescriptions' in consultation) { %> 
+  <div class="row">
   <% consultation.prescriptions.forEach(function(prescription) { %>
-    <div class="container prescription-containers">
-      <div class="row">
-        <div class="col-12">
-          <h6>prescription</h6>
-          <form action="/consultation/<%= consultation.id %>/prescription?_method=PUT" method="POST">
-            <!-- prescription id is needed when deleting or updating it -->
-            <input type="hidden" name="prescriptionId" value="<%= prescription.id %>">
-            <!-- set the selected medicine to the one stored in the prescription -->
+    <div class="col-12">
+      <div class="prescription-div">
+        <h6>prescription</h6>
+        <form action="/consultation/<%= consultation.id %>/prescription?_method=PUT" method="POST">
+          <!-- prescription id is needed when deleting or updating it -->
+          <input type="hidden" name="prescriptionId" value="<%= prescription.id %>">
+          <!-- set the selected medicine to the one stored in the prescription -->
+          <div class="div">
+            <span>medicine:</span>
             <select name="medicine">
               <% medications.forEach(function(medication) { %>
                 <% if(medication.id === prescription.medicine_id) { %> 
@@ -100,51 +107,59 @@
                   <option value="<%= medication.id %>_<%= medication.price_cents %>"><%= medication.name %></option>
                 <% }; %> 
               <% }); %> 
-            </select><br />
+            </select>
+          </div>
+          <div class="div">
             <label for="quantity">quantity:</label>
-            <input type="number" id="quantity" name="quantity" min="1" value="<%= prescription.quantity %>"><br />
-            <label for="instruction">instructions</label>
-            <textarea name="instruction" rows="2" class="form-control"><%= prescription.instruction %></textarea><br /><br />
-
-            <input class="btn btn-primary" type="submit" formaction="/consultation/<%= consultation.id %>/prescription?_method=DELETE" value="delete" />
-            <input class="btn btn-primary" type="submit" value="update" />
-          </form>
-        </div>
-      </div>
+            <input type="number" id="quantity" name="quantity" min="1" value="<%= prescription.quantity %>">
+          </div>
+          <div class="div">
+            <label for="instruction">instructions:</label>
+            <textarea name="instruction" rows="2" class="form-control"><%= prescription.instruction %></textarea>
+          </div>
+          <input class="btn btn-primary" type="submit" formaction="/consultation/<%= consultation.id %>/prescription?_method=DELETE" value="delete" />
+          <input class="btn btn-primary" type="submit" value="update" />
+        </form>
+      </div>         
     </div>
   <% }); %>
-<% }; %> 
+  </div>
+  <% }; %>
 
-<!-- form to create a new prescription -->
-<div class="container prescription-containers">
-  <div class="row">
-    <div class="col-12">
-      <h4>new prescription</h4>
+  <!-- form to create a new prescription -->
+  <div class="col-12">
+    <div class="div" id="new-prescription-div">
+      <h5>new prescription</h5>
       <form action="/consultation/<%= consultation.id %>/prescription" method="POST">
-        <select name="medicine" required>
+        <div class="div">
+          <span>medicine:</span>
+          <select name="medicine" required>
           <option value="" disabled selected hidden>choose medicine</option>
           <% medications.forEach(function(medication) { %> 
             <option value="<%= medication.id %>_<%= medication.price_cents %>"><%= medication.name %></option>
           <% }); %> 
-        </select><br /><br />
-        <label for="quantity">quantity:</label>
-        <input type="number" id="quantity" name="quantity" min="1" required><br /><br />
-        <label for="instruction">instructions:</label>
-        <textarea name="instruction" rows="2" class="form-control" required></textarea><br /><br />
-
+          </select>
+        </div>
+        <div class="div">
+           <label for="quantity">quantity:</label>
+          <input type="number" id="quantity" name="quantity" min="1" required>
+        </div>
+        <div class="div">
+          <label for="instruction">instructions:</label>
+          <textarea name="instruction" rows="2" class="form-control" required></textarea>
+        </div>
+        
         <input class="btn btn-primary" type="submit" value="create" />
       </form>
     </div>
   </div>
 </div>
 
-<br />
-
 <!-- consultation fees -->
-<div class="container consultation-fees-container">
+<div class="container" id="consultation-fees-container">
   <div class="row">
     <div class="col-12">
-      <h6>consultations fees</h6>
+      <h5>Consultations fees</h5>
       <p>consultation service: $<%= consultation.consultationPrice %></p>
       <p>medicine: $<%= consultation.medicinesPrice %></p>
       <p>total: $<%= consultation.totalPrice %></p>
@@ -153,41 +168,46 @@
 </div>
 
 <!-- chat box -->
-<% if (messages !== null) { %>
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <h4>Chat</h4>
-      </div>
-    </div>
-  </div>
-
-  <div class="container" id="messages-container">
-    <% messages.forEach(function(message) { %>
-    <div class="row">
-      <div class="col-12 text-wrap">
-        <h6><%= message.name %></h6>
-        <p><%= message.created_at %></p>
-        <p><%= message.description %></p>
-      </div>
-    </div>
-    <% }); %>
-  </div>
-<% }; %> 
-
-<!-- send message form for doctor -->
-<div class="container" id="create-message-container">
+<div class="container" id="chat-container">
   <div class="row">
     <div class="col-12">
-      <form action="/consultation/<%= consultation.id %>" method="POST">
-      <textarea name="message" rows="2" class="form-control"></textarea>
-      <input class="btn btn-primary" type="submit" value="send message" />
-      </form>
+      <h5>Chat</h5>
+    </div>
+  </div>
+
+  <!-- sent messages -->
+  <% if (messages !== null) { %>
+  <div class="row">
+    <div class="container" id="messages-container">
+      <% messages.forEach(function(message) { %>
+      <div class="row">
+        <div class="col-12 text-wrap">
+          <div class="message-div">
+            <h6><%= message.name %></h6>
+            <p><%= message.created_at %></p>
+            <p><%= message.description %></p>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <% }; %> 
+
+  <!-- send message form for doctor -->
+  <div class="row">
+    <div class="container" id="create-message-container">
+      <div class="row">
+        <div class="col-12">
+          <form action="/consultation/<%= consultation.id %>" method="POST">
+          <textarea name="message" rows="2" class="form-control"></textarea>
+          <input class="btn btn-primary" type="submit" value="send message" />
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
-<br />
 
 <!-- end consult button -->
 <div class="container" id="end-consult-container">
