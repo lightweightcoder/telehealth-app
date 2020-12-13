@@ -37,7 +37,11 @@ body {
 }
 
 #mode-message-col {
-  height: 15px;
+}
+
+#mode-message {
+  font-style: italic;
+  margin-left: 5px;
 }
 
 #new-consult-message {
