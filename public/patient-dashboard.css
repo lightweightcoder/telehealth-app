@@ -36,11 +36,6 @@ body {
   background-position: 30% 30%;
 }
 
-#mode-message {
-  font-style: italic;
-  margin-left: 5px;
-}
-
 #new-consult-message {
   font-size: 1.2rem;
   text-align: center;

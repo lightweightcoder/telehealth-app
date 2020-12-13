@@ -693,6 +693,14 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
     // store the doctors' data
     templateData.doctors = result.rows;
 
+    // if doctor's photo field in database is empty,
+    // give it an anonymous photo for display
+    templateData.doctors.forEach((doctor) => {
+      if (doctor.photo === null) {
+        doctor.photo = 'anonymous-person.jpg';
+      }
+    });
+
     return pool.query(clinicQuery);
   };
 
