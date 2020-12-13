@@ -1,0 +1,95 @@
+/* for navbar in header.ejs */
+#profile-photo-span {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 33px;
+}
+
+#profile-photo-img {
+  border-color: #a1dbf1 !important;
+  border-width: 3px !important;
+}
+
+#profile-photo-img:hover {
+  border-width: 3px !important;
+  border-color: #00b6bc !important;
+}
+/* ----------------------------------------- */
+
+body {
+  background-color: #efefef;
+  padding-top: 65px;
+  padding-bottom: 40px;
+}
+
+/* uncomment the css for body below when jquery navbar is not working */
+/* body {
+  padding-top: 160px;
+} */
+
+#new-consultation-heading {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+#form-container {
+  margin-bottom: 1rem;
+  padding: 20px;
+}
+
+input {
+  border-color: #00b6bc !important;
+}
+
+h4 {
+  text-align: center;
+}
+
+/* not for login */
+/* for new consult.ejs */
+/* profile photo is in header.ejs */
+#profile-photo-span {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  width: 33px;
+}
+
+/* for new-consult.ejs, */
+/* body {
+  padding-top: 65px;
+  padding-bottom: 40px;
+} */
+
+h1 {
+  text-align: center;
+}
+
+#text-item-input {
+  height: 200px;
+}
+
+#messages-container {
+  height: 300px;
+  white-space: normal;
+  overflow: auto;
+}
+/* not for login */
+
+/* for bootstrap col-sm */
+@media (min-width: 576px) {
+}
+
+/* for bootstrap col-md */
+@media (min-width: 768px) {
+}
+
+/* for bootstrap col-lg */
+@media (min-width: 992px) {
+  #form-container {
+    width: 900px;
+  }
+}
+
+/* for bootstrap col-xl */
+@media (min-width: 1200px) {
+}

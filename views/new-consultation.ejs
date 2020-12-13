@@ -1,13 +1,13 @@
 <!-- header -->
-<%- include('header', {cssFilePath: '/login.css'}); %>
+<%- include('header', {cssFilePath: '/new-consultation.css'}); %>
+
+<div class="row">
+  <div class="col-12">
+    <h4 id="new-consultation-heading">New Consultation</h4>
+  </div>
+</div>
 
 <div class="container" id="form-container">
-  <div class="row">
-    <div class="col">
-      <h1>New Consultation</h1>
-    </div>
-  </div>
-
   <form action="/consultation" method="POST">
     <div class="form-group">
       <label for="clinicName">clinic name</label><br />
@@ -32,7 +32,7 @@
     <input type="hidden" name="doctorId" value="<%= doctor.id %>">
     <input type="hidden" name="patientId" value="<%= patient.id %>">
 
-    <input type="submit" value="request consult" class="btn btn-outline-light" />
+    <input type="submit" value="request consult" class="btn btn-primary" />
   </form>
 </div>
 
