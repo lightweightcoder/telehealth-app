@@ -75,7 +75,7 @@ textarea {
   border-color: #ffa384;
 }
 
-#update-status-button-container-container {
+#update-status-button-container {
   padding: 20px;
 }
 
@@ -114,7 +114,8 @@ textarea {
   #general-details-form-container,
   #prescriptions-container,
   #consultation-fees-container,
-  #chat-container {
+  #chat-container,
+  #update-status-button-container {
     width: 900px;
   }
 }
