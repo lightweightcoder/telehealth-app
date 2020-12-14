@@ -6,13 +6,13 @@
 }
 
 #profile-photo-img {
-  border-color: #e7f2f8 !important;
+  border-color: #a1dbf1 !important;
   border-width: 3px !important;
 }
 
 #profile-photo-img:hover {
   border-width: 3px !important;
-  border-color: #ffa384 !important;
+  border-color: #00b6bc !important;
 }
 /* ----------------------------------------- */
 
@@ -33,7 +33,6 @@ body {
 }
 
 #general-details-form-container,
-#diagnosis-container,
 #prescriptions-container,
 #consultation-fees-container,
 #chat-container {
@@ -55,27 +54,13 @@ h5 {
   margin-bottom: 1rem;
 }
 
-#invalid-messages-list {
-  color: red;
-}
-
 input,
 textarea {
-  border-color: #ffa384 !important;
+  border-color: #00b6bc !important;
 }
 
 .btn {
   margin-top: 0.5rem;
-}
-
-.btn-primary {
-  border: none;
-  background-color: #d8c775;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background-color: #3b8796;
 }
 
 #prescriptions-container h6 {
@@ -90,16 +75,8 @@ textarea {
   border-color: #ffa384;
 }
 
-.prescription-div div {
-  margin-bottom: 10px;
-}
-
-#new-prescription-div {
-  margin-top: 1rem;
-}
-
-#new-prescription-div div {
-  margin-bottom: 10px;
+#update-status-button-container-container {
+  padding: 20px;
 }
 
 .messages-container {
@@ -121,10 +98,6 @@ textarea {
   margin-bottom: 0.2rem;
 }
 
-#end-consult-container {
-  padding: 20px;
-}
-
 /* for bootstrap col-sm */
 @media (min-width: 576px) {
 }
@@ -139,7 +112,6 @@ textarea {
 /* for bootstrap col-lg */
 @media (min-width: 992px) {
   #general-details-form-container,
-  #diagnosis-container,
   #prescriptions-container,
   #consultation-fees-container,
   #chat-container {

@@ -6,12 +6,13 @@
 }
 
 #profile-photo-img {
+  border-color: #a1dbf1 !important;
   border-width: 3px !important;
 }
 
 #profile-photo-img:hover {
   border-width: 3px !important;
-  border-color: #a3a7ab !important;
+  border-color: #00b6bc !important;
 }
 /* ----------------------------------------- */
 
@@ -31,7 +32,14 @@ body {
 }
 
 #form-container {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   padding: 20px;
+  border-color: #ffa384;
+  border-width: 1px;
+  border-style: dotted;
+  border-radius: 1rem;
+  background-color: #e7f2f8;
 }
 
 input,
