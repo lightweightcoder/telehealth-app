@@ -52,8 +52,8 @@ const multerUpload = multer({ dest: 'uploads/profile-photos' });
 // create an express application
 const app = express();
 // set the port number
-// const PORT = 3004;
-const PORT = process.argv[2];
+const PORT = process.env.PORT || 3004; // for heroku
+// const PORT = process.argv[2];
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 // config to accept request form data
