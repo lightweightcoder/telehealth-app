@@ -6,6 +6,9 @@ import cookieParser from 'cookie-parser';
 import jsSha from 'jssha';
 import multer from 'multer';
 import moment from 'moment';
+// npm libraries to tie together Multer, and S3 for heroku deployment
+import aws from 'aws-sdk';
+import multerS3 from 'multer-s3';
 
 // global variables -------------------------------
 // environment variable to use as a secret word for hashing userId cookie
@@ -14,6 +17,12 @@ const myEnvVar = process.env.MY_ENV_VAR;
 
 // error messages for queries
 const queryErrorMessage = 'error 503: service unavilable.<br /> Return to login page <a href="/">here</a>';
+
+// configure the aws-sdk and multerS3 libraries
+const s3 = new aws.S3({
+  accessKeyId: process.env.ACCESSKEYID,
+  secretAccessKey: process.env.SECRETACCESSKEY,
+});
 
 // Initialise the DB connection ----------
 const { Pool } = pg;
@@ -27,7 +36,7 @@ if (process.env.DATABASE_URL) {
   console.log('hi I am using heroku configs');
   // pg will take in the entire value and use it to connect
   pgConnectionConfigs = {
-    connectionString: process.env.DATABASE,
+    connectionString: process.env.DATABASE_URL,
   };
 } else if (process.env.ENV === 'PRODUCTION') {
   // this else if is for AWS deployment
@@ -55,7 +64,22 @@ const pool = new Pool(pgConnectionConfigs);
 
 // multer settings ------------------------
 // set the name of the upload directory here for multer
-const multerUpload = multer({ dest: 'uploads/profile-photos' });
+// const multerUpload = multer({ dest: 'uploads/profile-photos' });
+
+// set the name of the upload directory here for multer for heroku deployment
+const multerUpload = multer({
+  storage: multerS3({
+    s3,
+    bucket: '<MY_BUCKET_NAME>',
+    acl: 'public-read',
+    metadata: (request, file, callback) => {
+      callback(null, { fieldName: file.fieldname });
+    },
+    key: (request, file, callback) => {
+      callback(null, Date.now().toString());
+    },
+  }),
+});
 
 // Initialise Express ---------------------
 // create an express application
