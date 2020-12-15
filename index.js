@@ -39,6 +39,7 @@ if (process.env.DATABASE_URL) {
     connectionString: process.env.DATABASE_URL,
   };
 } else if (process.env.ENV === 'PRODUCTION') {
+  console.log('hi I am using production configs');
   // this else if is for AWS deployment
   // determine how we connect to the remote Postgres server
   pgConnectionConfigs = {
