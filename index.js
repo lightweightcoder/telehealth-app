@@ -33,22 +33,9 @@ let pgConnectionConfigs;
 
 // test to see if the env var is set. Then we know we are in Heroku
 if (process.env.DATABASE_URL) {
-  console.log('hi I am using heroku configs');
   // pg will take in the entire value and use it to connect
   pgConnectionConfigs = {
     connectionString: process.env.DATABASE_URL,
-  };
-} else if (process.env.ENV === 'PRODUCTION') {
-  console.log('hi I am using production configs');
-  // this else if is for AWS deployment
-  // determine how we connect to the remote Postgres server
-  pgConnectionConfigs = {
-    user: 'postgres',
-    // set DB_PASSWORD as an environment variable for security.
-    password: process.env.DB_PASSWORD,
-    host: 'localhost',
-    database: 'telehealth_app',
-    port: 5432,
   };
 } else {
   // determine how we connect to the local Postgres server
@@ -64,9 +51,6 @@ if (process.env.DATABASE_URL) {
 const pool = new Pool(pgConnectionConfigs);
 
 // multer settings ------------------------
-// set the name of the upload directory here for multer
-// const multerUpload = multer({ dest: 'uploads/profile-photos' });
-
 // set the name of the upload directory here for multer for heroku deployment
 const multerUpload = multer({
   storage: multerS3({
@@ -1855,8 +1839,9 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
   // if user updated a new photo, store the new photo hashed filename to update into database later
   let newPhotoFileName = '';
   if (request.file !== undefined) {
-    newPhotoFileName = request.file.filename;
+    newPhotoFileName = request.file.location;
   }
+  console.log('request.file is ', request.file);
 
   // variables to store additionl details for doctors
   let clinicIds = '';
