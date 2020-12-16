@@ -31,15 +31,7 @@ const { Pool } = pg;
 // ensure our server still works on our local machines.
 let pgConnectionConfigs;
 
-// test to see if the env var is set. Then we know we are in Heroku
-if (process.env.DATABASE_URL) {
-  console.log('hi I am using heroku configs');
-  // pg will take in the entire value and use it to connect
-  pgConnectionConfigs = {
-    connectionString: process.env.DATABASE_URL,
-  };
-} else if (process.env.ENV === 'PRODUCTION') {
-  console.log('hi I am using production configs');
+if (process.env.ENV === 'PRODUCTION') {
   // this else if is for AWS deployment
   // determine how we connect to the remote Postgres server
   pgConnectionConfigs = {
@@ -65,22 +57,7 @@ const pool = new Pool(pgConnectionConfigs);
 
 // multer settings ------------------------
 // set the name of the upload directory here for multer
-// const multerUpload = multer({ dest: 'uploads/profile-photos' });
-
-// set the name of the upload directory here for multer for heroku deployment
-const multerUpload = multer({
-  storage: multerS3({
-    s3,
-    bucket: 'telehealth-app-bucket',
-    acl: 'public-read',
-    metadata: (request, file, callback) => {
-      callback(null, { fieldName: file.fieldname });
-    },
-    key: (request, file, callback) => {
-      callback(null, Date.now().toString());
-    },
-  }),
-});
+const multerUpload = multer({ dest: 'uploads/profile-photos' });
 
 // Initialise Express ---------------------
 // create an express application
