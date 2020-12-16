@@ -150,8 +150,21 @@ const checkAuth = (request, response, next) => {
           return;
         }
 
-        // set the user as a key in the request object so that it's accessible in the route
         const user = result.rows[0];
+
+        const searchForHttpString = user.photo.search('http');
+
+        // eslint-disable-next-line max-len
+        // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+        if (user.photo === null) {
+          user.photo = '/profile-photos/anonymous-person.jpg';
+        } else if (searchForHttpString === -1) {
+          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+          // the heroku repo), change the url so it will render correctly
+          user.photo = `/profile-photos/${user.photo}`;
+        }
+
+        // set the user as a key in the request object so that it's accessible in the route
         request.user = user;
 
         console.log('checked Auth!');
@@ -1886,12 +1899,20 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
 
           // store the patient data to render in profile.ejs
           const user = selectResult.rows[0];
-          templateData.user = user;
 
-          // if user's photo field in database is empty, give it an anonymous photo
-          if (templateData.user.photo === null) {
-            templateData.user.photo = 'anonymous-person.jpg';
+          const searchForHttpString = user.photo.search('http');
+
+          // eslint-disable-next-line max-len
+          // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+          if (user.photo === null) {
+            user.photo = '/profile-photos/anonymous-person.jpg';
+          } else if (searchForHttpString === -1) {
+            // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+            // the heroku repo), change the url so it will render correctly
+            user.photo = `/profile-photos/${user.photo}`;
           }
+
+          templateData.user = user;
 
           // render the patient profile again with invalid form input messages
           response.render('profile', templateData);
@@ -1972,12 +1993,20 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
 
           // store the doctor data to render in profile.ejs
           const user = selectResult.rows[0];
-          templateData.user = user;
 
-          // if user's photo field in database is empty, give it an anonymous photo
-          if (templateData.user.photo === null) {
-            templateData.user.photo = 'anonymous-person.jpg';
+          const searchForHttpString = user.photo.search('http');
+
+          // eslint-disable-next-line max-len
+          // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+          if (user.photo === null) {
+            user.photo = '/profile-photos/anonymous-person.jpg';
+          } else if (searchForHttpString === -1) {
+            // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+            // the heroku repo), change the url so it will render correctly
+            user.photo = `/profile-photos/${user.photo}`;
           }
+
+          templateData.user = user;
 
           // make a database query to find clinics doctor is working at
           const doctorClinicsQuery = `SELECT clinic_id FROM clinic_doctors WHERE doctor_id=${templateData.user.id}`;
