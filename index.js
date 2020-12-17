@@ -565,6 +565,7 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
       } else {
         // doctor has a photo
         const searchForHttpString = consultation.doctor_photo.search('http');
+        console.log('searchforhttpstring: ', searchForHttpString);
 
         // check if the photo url is from AWS S3 or a test photo in heroku repo
         if (searchForHttpString === -1) {
