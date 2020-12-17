@@ -554,9 +554,9 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
     templateData.consultations.forEach((consultation) => {
       // if doctor's photo field in database is empty,
       // give it an anonymous photo for display
-      if (consultation.doctor_photo === null) {
-        consultation.doctor_photo = 'anonymous-person.jpg';
-      }
+      // if (consultation.doctor_photo === null) {
+      //   consultation.doctor_photo = 'anonymous-person.jpg';
+      // }
 
       // eslint-disable-next-line max-len
       // if doctor's photo field in database is empty, give it an anonymous photo to use in header.ejs
