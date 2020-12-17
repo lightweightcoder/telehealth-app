@@ -586,11 +586,6 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
     // set the navbar color for patient dashboard
     templateData.navbarColor = '#e3f2fd';
 
-    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-    // if (request.user.photo === null) {
-    //   templateData.user.photo = 'anonymous-person.jpg';
-    // }
-
     response.render('patient-dashboard', templateData);
   };
 
@@ -628,11 +623,11 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
 
     // format the date of the consultation and photo of the patient (if no photo)
     templateData.consultations.forEach((consultation) => {
-      // if patient's photo field in database is empty,
-      // give it an anonymous photo for display
-      if (consultation.patient_photo === null) {
-        consultation.patient_photo = 'anonymous-person.jpg';
-      }
+      // // if patient's photo field in database is empty,
+      // // give it an anonymous photo for display
+      // if (consultation.patient_photo === null) {
+      //   consultation.patient_photo = 'anonymous-person.jpg';
+      // }
 
       // if patient's photo field in database is empty, give it an anonymous photo for display
       if (consultation.patient_photo === null) {
@@ -664,11 +659,6 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
 
     // set the navbar color for doctor dashboard
     templateData.navbarColor = '#FBE7C6';
-
-    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-    // if (request.user.photo === null) {
-    //   templateData.user.photo = 'anonymous-person.jpg';
-    // }
 
     response.render('doctor-dashboard', templateData);
   };
@@ -737,11 +727,6 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
 
-  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-  if (request.user.photo === null) {
-    templateData.user.photo = 'anonymous-person.jpg';
-  }
-
   const clinicId = request.params.id;
 
   const doctorsQuery = `SELECT users.id, users.name, users.photo FROM users INNER JOIN clinic_doctors ON users.id=clinic_doctors.doctor_id WHERE clinic_doctors.clinic_id=${clinicId}`;
@@ -755,11 +740,22 @@ app.get('/clinics/:id', checkAuth, (request, response) => {
     // store the doctors' data
     templateData.doctors = result.rows;
 
-    // if doctor's photo field in database is empty,
+    // for each doctor, if doctor's photo field in database is empty,
     // give it an anonymous photo for display
     templateData.doctors.forEach((doctor) => {
       if (doctor.photo === null) {
-        doctor.photo = 'anonymous-person.jpg';
+        doctor.photo = '/profile-photos/anonymous-person.jpg';
+      } else {
+        // doctor has a photo
+        const searchForHttpString = doctor.photo.search('http');
+        console.log('searchforhttpstring: ', searchForHttpString);
+
+        // check if the photo url is from AWS S3 or a test photo in heroku repo
+        if (searchForHttpString === -1) {
+          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+          // the heroku repo), change the url so it will render correctly
+          doctor.photo = `/profile-photos/${doctor.photo}`;
+        }
       }
     });
 
@@ -805,11 +801,6 @@ app.get('/new-consultation/:clinicName/:doctorId', checkAuth, (request, response
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
-
-  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-  if (request.user.photo === null) {
-    templateData.user.photo = 'anonymous-person.jpg';
-  }
 
   // store the clinic name to display in a consultation
   templateData.clinicName = request.params.clinicName;
@@ -1057,11 +1048,6 @@ app.get('/consultation/:id', checkAuth, (request, response) => {
       templateData.navbarColor = '#e3f2fd';
     }
 
-    // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-    if (request.user.photo === null) {
-      templateData.user.photo = 'anonymous-person.jpg';
-    }
-
     response.render('show-consultation', templateData);
   };
 
@@ -1186,11 +1172,6 @@ app.get('/consultation/:id/edit', checkAuth, (request, response) => {
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
-
-  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-  if (request.user.photo === null) {
-    templateData.user.photo = 'anonymous-person.jpg';
-  }
 
   // set messages to null so ejs will not return error if there are no messages for the consultation
   templateData.messages = null;
@@ -1646,11 +1627,6 @@ app.get('/patient-consultations/:status', checkAuth, (request, response) => {
   // currently used for navbarBrand links in header.ejs
   templateData.user = request.user;
 
-  // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
-  if (request.user.photo === null) {
-    templateData.user.photo = 'anonymous-person.jpg';
-  }
-
   const consultationStatus = request.params.status;
 
   // store the consultation status for ejs file
@@ -1671,10 +1647,20 @@ app.get('/patient-consultations/:status', checkAuth, (request, response) => {
 
     // format the date of the consultation and photo of the doctor (if no photo)
     templateData.consultations.forEach((consultation) => {
-      // if doctor's photo field in database is empty,
-      // give it an anonymous photo for display
+      // if doctor's photo field in database is empty, give it an anonymous photo for display
       if (consultation.doctor_photo === null) {
-        consultation.doctor_photo = 'anonymous-person.jpg';
+        consultation.doctor_photo = '/profile-photos/anonymous-person.jpg';
+      } else {
+        // doctor has a photo
+        const searchForHttpString = consultation.doctor_photo.search('http');
+        console.log('searchforhttpstring: ', searchForHttpString);
+
+        // check if the photo url is from AWS S3 or a test photo in heroku repo
+        if (searchForHttpString === -1) {
+          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+          // the heroku repo), change the url so it will render correctly
+          consultation.doctor_photo = `/profile-photos/${consultation.doctor_photo}`;
+        }
       }
 
       // convert the consultation date to the display format (DD/MM/YYYY)
