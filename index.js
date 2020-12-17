@@ -1859,6 +1859,25 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
   const templateData = {};
   templateData.invalidMessages = invalidMessages;
 
+  // logic to store the navbar color in case we need
+  // to render the form again due to invalid form inputs
+  // if user is doctor and user is in doctor mode (in cookie)
+  // else user is patient / doctor is in patient mode so no need to set a mode
+  if (request.cookies.mode) {
+    if (request.cookies.mode === 'doctor') {
+      // doctor was in doctor mode
+      // set the navbar color for header.ejs
+      templateData.navbarColor = '#FBE7C6';
+    } else {
+      // doctor is in patient mode
+      // set the navbar color for header.ejs
+      templateData.navbarColor = '#e3f2fd';
+    }
+  } else {
+    // set the navbar color for header.ejs
+    templateData.navbarColor = '#e3f2fd';
+  }
+
   // updated details (to be added to database) of the user
   const {
     name, email, password, allergies, creditCardNumber, creditCardExpiry, cvv,
