@@ -558,6 +558,22 @@ app.get('/patient-dashboard', checkAuth, (request, response) => {
         consultation.doctor_photo = 'anonymous-person.jpg';
       }
 
+      // eslint-disable-next-line max-len
+      // if doctor's photo field in database is empty, give it an anonymous photo to use in header.ejs
+      if (consultation.doctor_photo === null) {
+        consultation.doctor_photo = '/profile-photos/anonymous-person.jpg';
+      } else {
+        // doctor has a photo
+        const searchForHttpString = consultation.doctor_photo.search('http');
+
+        // check if the photo url is from AWS S3 or a test photo in heroku repo
+        if (searchForHttpString === -1) {
+          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+          // the heroku repo), change the url so it will render correctly
+          consultation.doctor_photo = `/profile-photos/${consultation.doctor_photo}`;
+        }
+      }
+
       // convert the consultation date to the display format (DD/MM/YYYY)
       const rawDate = consultation.date;
       const formattedDate = moment(rawDate).format('DD-MMM-YYYY, h:mm a');
