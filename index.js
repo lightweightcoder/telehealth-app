@@ -623,12 +623,6 @@ app.get('/doctor-dashboard', checkAuth, (request, response) => {
 
     // format the date of the consultation and photo of the patient (if no photo)
     templateData.consultations.forEach((consultation) => {
-      // // if patient's photo field in database is empty,
-      // // give it an anonymous photo for display
-      // if (consultation.patient_photo === null) {
-      //   consultation.patient_photo = 'anonymous-person.jpg';
-      // }
-
       // if patient's photo field in database is empty, give it an anonymous photo for display
       if (consultation.patient_photo === null) {
         consultation.patient_photo = '/profile-photos/anonymous-person.jpg';
@@ -1723,10 +1717,20 @@ app.get('/doctor-consultations/:status', checkAuth, (request, response) => {
 
     // format the date of the consultation and photo of the patient (if no photo)
     templateData.consultations.forEach((consultation) => {
-      // if patient's photo field in database is empty,
-      // give it an anonymous photo for display
+      // if patient's photo field in database is empty, give it an anonymous photo for display
       if (consultation.patient_photo === null) {
-        consultation.patient_photo = 'anonymous-person.jpg';
+        consultation.patient_photo = '/profile-photos/anonymous-person.jpg';
+      } else {
+        // patient has a photo
+        const searchForHttpString = consultation.patient_photo.search('http');
+        console.log('searchforhttpstring: ', searchForHttpString);
+
+        // check if the photo url is from AWS S3 or a test photo in heroku repo
+        if (searchForHttpString === -1) {
+          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+          // the heroku repo), change the url so it will render correctly
+          consultation.patient_photo = `/profile-photos/${consultation.patient_photo}`;
+        }
       }
 
       // convert the consultation date to the display format (DD/MM/YYYY)
@@ -1760,11 +1764,6 @@ app.get('/profile', checkAuth, (request, response) => {
   // store user info for ejs file
   // currently used for navbarBrand links in header.ejs and user's data for profile.ejs
   templateData.user = request.user;
-
-  // if user's photo field in database is empty, give it an anonymous photo
-  if (request.user.photo === null) {
-    templateData.user.photo = 'anonymous-person.jpg';
-  }
 
   // if user is doctor and user is in doctor mode (in cookie)
   // else user is patient / doctor is in patient mode so no need to set a mode
@@ -1916,16 +1915,20 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
           // store the patient data to render in profile.ejs
           const user = selectResult.rows[0];
 
-          const searchForHttpString = user.photo.search('http');
-
           // eslint-disable-next-line max-len
-          // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
+          // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs and in profile page
           if (user.photo === null) {
             user.photo = '/profile-photos/anonymous-person.jpg';
-          } else if (searchForHttpString === -1) {
+          } else {
+          // user has a photo
+            const searchForHttpString = user.photo.search('http');
+
+            // check if the photo url is from AWS S3 or a test photo in heroku repo
+            if (searchForHttpString === -1) {
             // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
             // the heroku repo), change the url so it will render correctly
-            user.photo = `/profile-photos/${user.photo}`;
+              user.photo = `/profile-photos/${user.photo}`;
+            }
           }
 
           templateData.user = user;
@@ -2010,16 +2013,20 @@ app.put('/profile', checkAuth, multerUpload.single('photo'), (request, response)
           // store the doctor data to render in profile.ejs
           const user = selectResult.rows[0];
 
-          const searchForHttpString = user.photo.search('http');
-
           // eslint-disable-next-line max-len
           // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
           if (user.photo === null) {
             user.photo = '/profile-photos/anonymous-person.jpg';
-          } else if (searchForHttpString === -1) {
+          } else {
+          // user has a photo
+            const searchForHttpString = user.photo.search('http');
+
+            // check if the photo url is from AWS S3 or a test photo in heroku repo
+            if (searchForHttpString === -1) {
             // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
             // the heroku repo), change the url so it will render correctly
-            user.photo = `/profile-photos/${user.photo}`;
+              user.photo = `/profile-photos/${user.photo}`;
+            }
           }
 
           templateData.user = user;
