@@ -152,16 +152,20 @@ const checkAuth = (request, response, next) => {
 
         const user = result.rows[0];
 
-        const searchForHttpString = user.photo.search('http');
-
         // eslint-disable-next-line max-len
         // if user's photo field in database is empty, give it an anonymous photo to use in header.ejs
         if (user.photo === null) {
           user.photo = '/profile-photos/anonymous-person.jpg';
-        } else if (searchForHttpString === -1) {
-          // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
-          // the heroku repo), change the url so it will render correctly
-          user.photo = `/profile-photos/${user.photo}`;
+        } else {
+          // user has a photo
+          const searchForHttpString = user.photo.search('http');
+
+          // check if the photo url is from AWS S3 or a test photo in heroku repo
+          if (searchForHttpString === -1) {
+            // if the photo is not a photo uploaded on AWS S3 (i.e. it is a test photo in
+            // the heroku repo), change the url so it will render correctly
+            user.photo = `/profile-photos/${user.photo}`;
+          }
         }
 
         // set the user as a key in the request object so that it's accessible in the route
