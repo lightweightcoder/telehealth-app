@@ -115,12 +115,6 @@ module.exports = {
       },
     ];
 
-    await queryInterface.bulkInsert(
-      'Users',
-      doctorsInfo,
-      { returning: true },
-    );
-
     const patientsInfo = [
       {
         name: 'Henry Park',
@@ -162,12 +156,6 @@ module.exports = {
       },
     ];
 
-    await queryInterface.bulkInsert(
-      'Users',
-      patientsInfo,
-      { returning: true },
-    );
-
     const clinicsInfo = [
       {
         name: 'Pinnacle Family Clinic',
@@ -198,12 +186,6 @@ module.exports = {
         updatedAt: new Date(),
       },
     ];
-
-    await queryInterface.bulkInsert(
-      'Clinics',
-      clinicsInfo,
-      { returning: true },
-    );
 
     const clinicDoctorsInfo = [
       {
@@ -256,12 +238,34 @@ module.exports = {
       },
     ];
 
-    // Insert clinicsDoctors last because it reference Users and Clinics
-    await queryInterface.bulkInsert(
-      'ClinicDoctors',
-      clinicDoctorsInfo,
-      { returning: true },
-    );
+    try {
+      await queryInterface.bulkInsert(
+        'Users',
+        doctorsInfo,
+        { returning: true },
+      );
+
+      await queryInterface.bulkInsert(
+        'Users',
+        patientsInfo,
+        { returning: true },
+      );
+
+      await queryInterface.bulkInsert(
+        'Clinics',
+        clinicsInfo,
+        { returning: true },
+      );
+
+      // Insert clinicsDoctors last because it reference Users and Clinics
+      await queryInterface.bulkInsert(
+        'ClinicDoctors',
+        clinicDoctorsInfo,
+        { returning: true },
+      );
+    } catch (error) {
+      console.log(error);
+    }
   },
 
   down: async (queryInterface) => {

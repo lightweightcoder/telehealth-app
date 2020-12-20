@@ -10,6 +10,9 @@ import moment from 'moment';
 import aws from 'aws-sdk';
 import multerS3 from 'multer-s3';
 
+// import the routes
+import routes from './routes.mjs';
+
 // global variables -------------------------------
 // environment variable to use as a secret word for hashing userId cookie
 // environment variable is currently stored in ~/.profile (see RA module 3.6.4)
@@ -189,19 +192,21 @@ const checkAuth = (request, response, next) => {
   console.log('no loggedInHash & userId cookies found');
 };
 
-// routes ==============================
+// set the routes
+routes(app);
 
+// routes that are not in routes.mjs ==================
 // start of functionality for user to login --------
-// render the login form
-app.get('/', (request, response) => {
-  console.log('request to render a login form came in');
+// // render the login form
+// app.get('/', (request, response) => {
+//   console.log('request to render a login form came in');
 
-  // set validation object to prevent ejs from getting errors
-  const templateData = {};
-  templateData.validation = {};
+//   // set validation object to prevent ejs from getting errors
+//   const templateData = {};
+//   templateData.validation = {};
 
-  response.render('login', templateData);
-});
+//   response.render('login', templateData);
+// });
 
 // accept the login form request
 app.post('/', (request, response) => {
