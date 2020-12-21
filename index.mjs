@@ -3,7 +3,7 @@ import express from 'express';
 import methodOverride from 'method-override';
 import pg from 'pg';
 import cookieParser from 'cookie-parser';
-import jsSha from 'jssha';
+// import jsSha from 'jssha';
 import multer from 'multer';
 import moment from 'moment';
 // npm libraries to tie together Multer, and S3 for heroku deployment
@@ -209,77 +209,77 @@ routes(app);
 // });
 
 // accept the login form request
-app.post('/', (request, response) => {
-  console.log('post request to login came in');
+// app.post('/', (request, response) => {
+//   console.log('post request to login came in');
 
-  // set object to store messages for invalid email or password input fields
-  const templateData = {};
+//   // set object to store messages for invalid email or password input fields
+//   const templateData = {};
 
-  const values = [request.body.email];
+//   const values = [request.body.email];
 
-  pool.query('SELECT * from users WHERE email=$1', values, (error, result) => {
-    if (error) {
-      console.log('Error executing query', error.stack);
-      response.status(503).send(queryErrorMessage);
-      return;
-    }
+//   pool.query('SELECT * from users WHERE email=$1', values, (error, result) => {
+//     if (error) {
+//       console.log('Error executing query', error.stack);
+//       response.status(503).send(queryErrorMessage);
+//       return;
+//     }
 
-    console.log('select user query done!');
+//     console.log('select user query done!');
 
-    const user = result.rows[0];
+//     const user = result.rows[0];
 
-    // verify input email and password with those in database
-    if (result.rows.length !== 0) {
-      if (user.password === request.body.password) {
-        console.log('email and password matched!');
+//     // verify input email and password with those in database
+//     if (result.rows.length !== 0) {
+//       if (user.password === request.body.password) {
+//         console.log('email and password matched!');
 
-        // generate a loggedInHash for user id ------
-        // create new SHA object
-        // eslint-disable-next-line new-cap
-        const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
-        // create an unhashed cookie string based on user ID and salt
-        const unhashedCookieString = `${user.id}-${myEnvVar}`;
-        // generate a hashed cookie string using SHA object
-        shaObj.update(unhashedCookieString);
-        const hashedCookieString = shaObj.getHash('HEX');
+//         // generate a loggedInHash for user id ------
+//         // create new SHA object
+//         // eslint-disable-next-line new-cap
+//         const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
+//         // create an unhashed cookie string based on user ID and salt
+//         const unhashedCookieString = `${user.id}-${myEnvVar}`;
+//         // generate a hashed cookie string using SHA object
+//         shaObj.update(unhashedCookieString);
+//         const hashedCookieString = shaObj.getHash('HEX');
 
-        // set the loggedInHash and userId cookies in the response
-        response.cookie('loggedInHash', hashedCookieString);
-        response.cookie('userId', user.id);
+//         // set the loggedInHash and userId cookies in the response
+//         response.cookie('loggedInHash', hashedCookieString);
+//         response.cookie('userId', user.id);
 
-        // if user is a doctor, send a cookie to keep track of what mode the doctor is in
-        // the doctor starts in patient mode. This cookie will change the color of the navbar
-        // depending on the mode doctor is in. Give cookie any mode because it will always
-        // change to patient mode after redirecting to /patient-dashboard
-        if (user.is_doctor === true) {
-          response.cookie('mode', 'patient');
-        }
+//         // if user is a doctor, send a cookie to keep track of what mode the doctor is in
+//         // the doctor starts in patient mode. This cookie will change the color of the navbar
+//         // depending on the mode doctor is in. Give cookie any mode because it will always
+//         // change to patient mode after redirecting to /patient-dashboard
+//         if (user.is_doctor === true) {
+//           response.cookie('mode', 'patient');
+//         }
 
-        // redirect user to patient dashboard
-        response.redirect('/patient-dashboard');
-      } else {
-      // password didn't match
-        console.log('password did not match');
+//         // redirect user to patient dashboard
+//         response.redirect('/patient-dashboard');
+//       } else {
+//       // password didn't match
+//         console.log('password did not match');
 
-        // add message to inform user of invalid email/password
-        templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
+//         // add message to inform user of invalid email/password
+//         templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
 
-        // redirect to login page
-        response.render('login', templateData);
-      }
-    }
-    else {
-      // email didn't match
-      console.log('email did not match');
+//         // redirect to login page
+//         response.render('login', templateData);
+//       }
+//     }
+//     else {
+//       // email didn't match
+//       console.log('email did not match');
 
-      // add message to inform user of invalid email/password
-      templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
+//       // add message to inform user of invalid email/password
+//       templateData.invalidMessage = 'Sorry you have keyed in an incorrect email/password';
 
-      // redirect to login page
-      response.render('login', templateData);
-    }
-  });
-});
+//       // redirect to login page
+//       response.render('login', templateData);
+//     }
+//   });
+// });
 // end of functionality for user to login --------
 
 // start of functionality for user to signup --------
