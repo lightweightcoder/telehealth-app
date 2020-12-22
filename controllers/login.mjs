@@ -1,4 +1,4 @@
-import { getHash } from '../helper-functions/helper-functions.mjs';
+import { getHash } from '../lib/non-db-helper-functions.mjs';
 
 export default function login(db) {
   const findUser = async (request, response) => {
