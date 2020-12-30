@@ -1,4 +1,4 @@
-import { getHash } from '../helper-functions/helper-functions.mjs';
+import { getHash } from '../lib/non-db-helper-functions.mjs';
 
 // error messages for queries
 const queryErrorMessage = 'error 503: service unavilable.<br /> Return to login page <a href="/">here</a>';
