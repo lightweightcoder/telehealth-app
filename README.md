@@ -1,5 +1,7 @@
-# telehealth-app
+# telehealth-app (Dr on the Go)
 SWE1 Project 2: server side app
+
+## [Website](https://telehealth-app-ra.herokuapp.com/)
 
 ## Technologies used
 - Database: PostgreSQL
