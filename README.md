@@ -7,9 +7,10 @@ SWE1 Project 2: server side app
 ## Technologies used
 
 - Database: PostgreSQL
+- Front-end: EJS
 - Back-end framework: Express (Node.js)
-- languages: HTML, CSS, JavaScript, SQL
-  Other technologies: Github, Heroku, Bootstrap, AWS S3
+- Cloud: Github, Heroku, AWS S3
+- Languages: HTML, CSS, JavaScript, SQL
 
 ## About
 
