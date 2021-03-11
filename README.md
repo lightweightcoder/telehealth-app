@@ -1,4 +1,4 @@
-# telehealth-app (Dr on the Go)
+# telehealth-app (Doctor on the Go)
 
 SWE1 Project 2: server side app
 
