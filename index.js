@@ -58,7 +58,7 @@ const pool = new Pool(pgConnectionConfigs);
 const multerUpload = multer({
   storage: multerS3({
     s3,
-    bucket: 'telehealth-app-bucket',
+    bucket: 'aljt-heroku',
     acl: 'public-read',
     metadata: (request, file, callback) => {
       callback(null, { fieldName: file.fieldname });
