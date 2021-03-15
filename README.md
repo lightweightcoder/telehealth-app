@@ -23,3 +23,6 @@ This app allows doctors to have online consultations with patients and keeps rec
 3. A doctor can accept, start, cancel and end consultation and view past consultations.
 4. Forum-like chatbox for patient and doctor to interaction during the consultation.
 5. A doctor can prescribe medicine for the patient.
+
+## More Info
+For more information such as the wireframes, ERD and sitemap, the documents are accessible in the planning-docs folder.
