@@ -2200,5 +2200,65 @@ app.get('/logout', (request, response) => {
   response.redirect('/');
 });
 
+// accept a request to login a demo user
+app.get('/demo-login', (request, response) => {
+  console.log('get request to login a demo user came in');
+
+  // set object to store message in case a demo user is not found
+  const templateData = {};
+
+  const values = ['doctor1@gmail.com'];
+
+  pool.query('SELECT * from users WHERE email=$1', values, (error, result) => {
+    if (error) {
+      console.log('Error executing query', error.stack);
+      response.status(503).send(queryErrorMessage);
+      return;
+    }
+
+    console.log('select user query done!');
+
+    const user = result.rows[0];
+
+    // if demo user is found in database
+    if (result.rows.length !== 0) {
+      // generate a loggedInHash for user id ------
+      // create new SHA object
+      // eslint-disable-next-line new-cap
+      const shaObj = new jsSha('SHA-512', 'TEXT', { encoding: 'UTF8' });
+      // create an unhashed cookie string based on user ID and salt
+      const unhashedCookieString = `${user.id}-${myEnvVar}`;
+      // generate a hashed cookie string using SHA object
+      shaObj.update(unhashedCookieString);
+      const hashedCookieString = shaObj.getHash('HEX');
+
+      // set the loggedInHash and userId cookies in the response
+      response.cookie('loggedInHash', hashedCookieString);
+      response.cookie('userId', user.id);
+
+      // if user is a doctor, send a cookie to keep track of what mode the doctor is in
+      // the doctor starts in patient mode. This cookie will change the color of the navbar
+      // depending on the mode doctor is in. Give cookie any mode because it will always
+      // change to patient mode after redirecting to /patient-dashboard
+      if (user.is_doctor === true) {
+          response.cookie('mode', 'patient');
+      }
+
+      // redirect user to patient dashboard
+      response.redirect('/patient-dashboard');
+    }
+    else {
+      // demo user could not be found using email
+      console.log('email did not match');
+
+      // add message to inform user of that demo login failed
+      templateData.invalidMessage = 'Sorry demo login is unavailable now. Please register instead';
+
+      // redirect to login page
+      response.render('login', templateData);
+    }
+  });
+});
+
 // set the port to listen for requests
 app.listen(PORT);
