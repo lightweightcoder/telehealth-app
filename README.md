@@ -26,3 +26,4 @@ This app allows doctors to have online consultations with patients and keeps rec
 
 ## More Info
 For more information such as the wireframes, ERD and sitemap, the documents are accessible in the planning-docs folder.
+Visit https://lightweightcoder.github.io/portfolio/dr-on-the-go.html to learn more about the app.
